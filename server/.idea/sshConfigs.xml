@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig connectionConfig="{&quot;serverAliveInterval&quot;:300}" host="110.41.10.96" id="2154416b-80d3-41e6-b6ce-d57921357101" keyPath="C:\Users\86147\Desktop\作业\项导树\ecs\KeyPair-fsr.pem" port="22" customName="wb" nameFormat="CUSTOM" username="root">
+        <option name="customName" value="wb" />
+      </sshConfig>
+    </configs>
+  </component>
+</project>
