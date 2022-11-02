@@ -1,0 +1,69 @@
+version: '3'
+services:
+
+  mysql:
+    image: mysql:8
+    container_name: mymysql
+    restart: always
+    privileged: true
+    environment:
+      TZ: Asia/Shanghai
+      # 设置 root 用户密码
+      MYSQL_ROOT_PASSWORD: mysql_wb1234
+      # 新建数据库
+      MYSQL_DATABASE: wbsql
+      # 创建新的用户
+      MYSQL_USER: wb
+      MYSQL_PASSWORD: mysql_wb1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - /hom/mysql/lib:/var/lib/mysql
+      - /hom/mysql/log:/var/log/mysql
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+    networks:
+      - wb-server
+
+  nginx:
+    image: nginx
+    container_name: mynginx
+    restart: always
+    privileged: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # 挂载nginx目录
+      - /hom/nginx/share:/usr/share/nginx
+      # 挂载nginx日志
+      - /hom/nginx/log:/var/log/nginx
+      # 挂载nginx配置文件
+      - /hom/nginx/conf.d:/etc/nginx/conf.d
+      - /hom/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - wb-server
+
+  wb:
+    container_name: mywb
+    restart: always
+    privileged: true
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      # 挂载代码，方便同步上传
+      - /hom/wb:/wb
+    depends_on:
+      - mysql
+      - nginx
+    entrypoint: ["./wait-for-it.sh", "mymysql:3306", "--", "air"]
+    networks:
+      - wb-server
+
+networks:
+  wb-server:
