@@ -13,4 +13,4 @@ defineProps<{ msg: string }>();
 const count = ref(0);
 </script>
 
-<style scoped lang="scass"></style>
+<style scoped lang="scss"></style>
