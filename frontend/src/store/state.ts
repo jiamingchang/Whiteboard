@@ -1,4 +1,8 @@
 // state类型的数据
-export interface RootStateType {}
+export interface RootStateType {
+  pageWidth: Number;
+}
 
-export default {};
+export default {
+  pageWidth: 0,
+};

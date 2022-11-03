@@ -1,18 +1,24 @@
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import store from "@/store";
+import { useChangePageWidth } from "@/utils/hooks";
+let currpage = ref(1);
+let totalCount = ref(1);
+let pageWidth = computed(() => (store.state.pageWidth === 0 ? 330 : 0));
+let changeWidth = useChangePageWidth();
+</script>
+
 <template>
   <div class="boardContainer">
     <div class="left-action">
-      <div class="left-action-left">{{ currpage }} / {{ totalCount }}</div>
+      <div class="left-action-left" @click="() => changeWidth(pageWidth)">
+        {{ currpage }} / {{ totalCount }}
+      </div>
       <!-- 拓展 -->
       <div class="left-action-right"></div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-let currpage = ref(1);
-let totalCount = ref(1);
-</script>
 
 <style scoped lang="scss">
 .boardContainer {
@@ -30,6 +36,7 @@ let totalCount = ref(1);
       width: 40px;
       height: 20px;
       box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
+      cursor: pointer;
     }
   }
 }
