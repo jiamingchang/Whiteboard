@@ -6,9 +6,9 @@ import "gorm.io/gorm"
 type User struct {
 	gorm.Model
 	TrueName string `json:"true_name" validate:"required"`
-	Name string		 `json:"name" validate:"required"`
+	Name string		`json:"name" validate:"required"`
 	Password string `json:"password" validate:"required,max=20,min=6"`
-	Rooms []Room    `gorm:"many2many:user_room"`
+	RoomID uint		`json:"room_id"`
 }
 
 // Login 登录账号
@@ -32,6 +32,6 @@ func GetUser(id interface{})(user User, err error){
 }
 
 // DeleteUser 注销账号
-func (u *User)DeleteUser() error{
+func (u User)DeleteUser() error{
 	return db.Delete(&User{}, u.ID).Error
 }

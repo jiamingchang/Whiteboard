@@ -12,7 +12,6 @@ var Conf *ini.File
 type Server struct {
 	HttpPort       string
 	RunMode        string
-	PageSize       int
 }
 type App struct {
 	JwtSecret 	string

@@ -14,8 +14,8 @@ import (
 )
 
 // Current 获取当前用户
-func Current(c *gin.Context) (user *models.User){
-	return c.MustGet("user").(*models.User)
+func Current(c *gin.Context) (user models.User){
+	return c.MustGet("user").(models.User)
 }
 
 // BindAndValid 表单数据验证函数

@@ -4,14 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"whiteboard/api"
 	"whiteboard/middleware"
-	"whiteboard/models"
+	"whiteboard/setting"
 )
 
 func RoutesController() *gin.Engine {
 	router := gin.Default()
+	gin.SetMode(setting.ServerSettings.RunMode)
 
-	// 实时传输数据
-	router.GET("/send", models.Send)
+	// 实时传输数据(ws)
+	router.GET("/wb/live", api.KeepLive)
 
 	v1 := router.Group("/wb/")
 	{
@@ -28,6 +29,18 @@ func RoutesController() *gin.Engine {
 		// 获取用户信息
 		v2.GET("getUser", api.GetUser)
 
+		// 创建房间
+		v2.POST("createRoom", api.CreateRoom)
+		// 获取房间 信息
+		v2.GET("getRoom", api.GetRoom)
+		// 获取用户所在房间
+		v2.GET("getUserRoom", api.GetUserRoom)
+		// 更新房间 信息
+		v2.POST("updateRoom", api.UpdateRoom)
+		// 加入房间
+		v2.POST("joinRoom", api.JoinRoom)
+		// 退出房间
+		v2.POST("exitRoom", api.ExitRoom)
 	}
 
 	return router
