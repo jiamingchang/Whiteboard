@@ -1,4 +1,4 @@
-let BASE_URL = "";
+let BASE_URL = "https://hm.sztufsrlab.com";
 const TIME_OUT = 10000;
 
 if (process.env.NODE_ENV === "development") {

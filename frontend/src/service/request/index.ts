@@ -1,14 +1,15 @@
 //二次封装axios
 import axios from "axios";
+import { BASE_URL, TIME_OUT } from "./config";
 
 //创建一个实例
-const instance = axios.create({
-  baseURL: "", //基础路径
-  timeout: 3000, //请求超时时间
+const request = axios.create({
+  baseURL: `${BASE_URL}/wb`, //基础路径
+  timeout: TIME_OUT, //请求超时时间
 });
 
 //拦截器
-instance.interceptors.request.use(
+request.interceptors.request.use(
   (config) => {
     return config;
   },
@@ -17,7 +18,7 @@ instance.interceptors.request.use(
   }
 );
 
-instance.interceptors.response.use(
+request.interceptors.response.use(
   (result) => {
     return result.data;
   },
@@ -26,4 +27,4 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance;
+export default request;
