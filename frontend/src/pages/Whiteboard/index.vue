@@ -5,8 +5,6 @@ import store from "@/store";
 import { ref, computed } from "vue";
 defineProps<{ msg: string }>();
 let pageWidth = computed(() => store.state.pageWidth);
-
-const count = ref(0);
 </script>
 <template>
   <div class="whiteboardContainer">
