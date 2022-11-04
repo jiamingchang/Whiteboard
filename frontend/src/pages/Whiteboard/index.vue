@@ -14,7 +14,6 @@ const count = ref(0);
       class="page"
       :style="{
         width: pageWidth + 'px',
-        opacity: pageWidth === 0 ? 0 : 1,
       }"
     >
       <Page />
@@ -32,7 +31,8 @@ const count = ref(0);
   height: 100vh;
 
   .page {
-    width: 330px;
+    position: relative;
+    overflow: hidden;
     height: 100%;
     transition: width 0.5s linear;
     border-right: 1px solid #f0f0f0;

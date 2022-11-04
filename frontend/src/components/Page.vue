@@ -20,10 +20,9 @@ const close = useChangePageWidth();
 
 <style scoped lang="scss">
 .pageContainer {
-  width: 100%;
+  width: 330px;
   height: 100%;
   position: relative;
-  overflow: hidden;
   .header {
     padding: 16px 16px 16px 24px;
     display: flex;
