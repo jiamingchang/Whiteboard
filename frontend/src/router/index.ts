@@ -9,6 +9,10 @@ const routes: Array<RouteRecordRaw> = [
     path: "/whiteboard",
     component: () => import("@/pages/Whiteboard/index.vue"),
   },
+  {
+    path: "*",
+    redirect: "/"
+  }
 ];
 
 const router = createRouter({
