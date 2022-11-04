@@ -55,7 +55,7 @@ func AuthRequired() gin.HandlerFunc {
 				context.Abort()
 				return
 			}
-			context.Set("user", &user)
+			context.Set("user", user)
 		}
 	}
 }
