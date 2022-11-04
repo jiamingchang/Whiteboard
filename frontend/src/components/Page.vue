@@ -6,17 +6,13 @@ const close = useAnimationPageWidth();
 let pageList = computed(() => store.state.pageList);
 
 // 一开始默认选中第一个
-let selectPage = computed(() =>
-  store.state.selectPage
-    ? store.state.selectPage
-    : store.state.pageList[0].pageId
-);
-let hoverIndex = ref<Number>(-1);
+let selectPage = computed(() => store.state.page);
+let hoverIndex = ref<number>(-1);
 
 const mouseleaveHandle = () => {
   hoverIndex.value = -1;
 };
-const mousemoveHandle = (index: Number) => {
+const mousemoveHandle = (index: number) => {
   hoverIndex.value = index;
 };
 const selectPageHandle = (pageId: String) => {
@@ -41,11 +37,11 @@ const addPage = () => {
           @mousemove="mousemoveHandle(index)"
           @mouseleave="mouseleaveHandle"
           @click="selectPageHandle(item.pageId)"
-          :class="['page-item', selectPage === item.pageId ? 'selected' : '']"
+          :class="['page-item', selectPage === index ? 'selected' : '']"
         >
           <div
             class="more-action"
-            v-if="selectPage === item.pageId || hoverIndex === index"
+            v-if="selectPage === index || hoverIndex === index"
           >
             <span class="iconfont icon-gengduo"></span>
           </div>

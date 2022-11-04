@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import store from "@/store";
 import { useAnimationPageWidth } from "@/utils/hooks";
-let currpage = ref(1);
-let totalCount = ref(1);
+
 let toggle = useAnimationPageWidth();
+let isclick = computed(() => (store.state.pageWidth === 0 ? false : true));
+let currpage = computed(() => store.state.page + 1);
+let totalCount = computed(() => store.state.pageList.length);
 </script>
 
 <template>
   <div class="boardContainer">
     <div class="left-action">
-      <div class="left-action-left" @click="toggle">
+      <div
+        :class="['left-action-left', isclick ? 'selected' : '']"
+        @click="toggle"
+      >
         {{ currpage }} / {{ totalCount }}
       </div>
       <!-- 拓展 -->
@@ -35,6 +41,9 @@ let toggle = useAnimationPageWidth();
       height: 20px;
       box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
       cursor: pointer;
+    }
+    .selected {
+      color: #3456ff;
     }
   }
 }

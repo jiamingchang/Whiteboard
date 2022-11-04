@@ -8,14 +8,14 @@ export interface allPageType {
 }
 
 export interface RootStateType {
-  pageWidth: Number;
-  selectPage: String;
+  pageWidth: number;
+  page: number;
   pageList: Array<allPageType>;
 }
 
 export default {
   pageWidth: 0,
-  selectPage: "",
+  page: 0,
   pageList: [
     {
       pageId: guid(),
