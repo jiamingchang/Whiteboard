@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { useChangePageWidth } from "@/utils/hooks";
-const close = useChangePageWidth();
+import { useAnimationPageWidth } from "@/utils/hooks";
+const close = useAnimationPageWidth();
 </script>
 <template>
   <div class="pageContainer">
     <div class="header">
       <div class="header-text">多页</div>
-      <div
-        class="iconfont icon-cuowuguanbiquxiao"
-        @click="() => close(0)"
-      ></div>
+      <div class="iconfont icon-cuowuguanbiquxiao" @click="close"></div>
     </div>
     <div class="body"></div>
     <div class="footer">

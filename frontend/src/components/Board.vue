@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import store from "@/store";
-import { useChangePageWidth } from "@/utils/hooks";
+import { ref } from "vue";
+import { useAnimationPageWidth } from "@/utils/hooks";
 let currpage = ref(1);
 let totalCount = ref(1);
-let pageWidth = computed(() => (store.state.pageWidth === 0 ? 330 : 0));
-let changeWidth = useChangePageWidth();
+let toggle = useAnimationPageWidth();
 </script>
 
 <template>
   <div class="boardContainer">
     <div class="left-action">
-      <div class="left-action-left" @click="() => changeWidth(pageWidth)">
+      <div class="left-action-left" @click="toggle">
         {{ currpage }} / {{ totalCount }}
       </div>
       <!-- 拓展 -->
