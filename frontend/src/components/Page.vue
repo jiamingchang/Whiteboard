@@ -54,7 +54,7 @@ const addPage = () => {
     </div>
     <div class="footer" @click="addPage">
       <div class="footer-text">
-        <span class="iconfont icon-tianjia"></span> 新建分页
+        <span class="iconfont icon-tianjia"></span> <span></span> 新建分页
       </div>
     </div>
   </div>
