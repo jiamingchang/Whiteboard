@@ -1,21 +1,71 @@
 <script setup lang="ts">
 import Canvas from "./Canvas.vue";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import store from "@/store";
+import { useEyeDropper } from "@vueuse/core";
 import { useAnimationPageWidth } from "@/utils/hooks";
 import { useFullscreen } from "@vueuse/core";
+import { toolbarOptions } from "@/enum/toolbar";
+
+// 全屏
 const { isFullscreen, toggle } = useFullscreen();
-let isclick = computed(() => (store.state.pageWidth === 0 ? false : true));
+// 着色器
+const { isSupported, open, sRGBHex } = useEyeDropper();
+let pageWidth = computed(() => store.state.pageWidth);
+let isclick = computed(() => (pageWidth.value === 0 ? false : true));
+let currentType = computed(() => store.state.currentType);
 let toggleWidth = useAnimationPageWidth();
 
 let currpage = computed(() => store.state.page + 1);
 let totalCount = computed(() => store.state.pageList.length);
+let toolbarData = ref(toolbarOptions);
+const selectActionHandle = (type: string) => {
+  store.commit("changeCurrentType", type);
+  if (isSupported && type === "shaders") {
+    open();
+  }
+};
+
+watch(
+  () => sRGBHex.value,
+  (val) => {
+    console.log(val);
+  }
+);
 </script>
 
 <template>
-  <div class="boardContainer" ref="container">
+  <div class="boardContainer">
     <Canvas />
-    <div class="left-action">
+    <div
+      class="toolbar"
+      :style="{
+        left: pageWidth + 'px',
+      }"
+    >
+      <div
+        class="toolbar-item"
+        v-for="item in toolbarData"
+        :key="item.key"
+        @click="selectActionHandle(item.type)"
+      >
+        <el-tooltip
+          class="box-item"
+          :content="item.tips"
+          placement="right-start"
+        >
+          <div
+            :class="[item.iconClass, item.type === currentType ? 'active' : '']"
+          ></div>
+        </el-tooltip>
+      </div>
+    </div>
+    <div
+      class="left-action"
+      :style="{
+        left: pageWidth + 'px',
+      }"
+    >
       <div
         :class="['left-action-left', isclick ? 'selected' : '']"
         @click="toggleWidth"
@@ -50,6 +100,9 @@ let totalCount = computed(() => store.state.pageList.length);
   width: 100%;
   height: 100%;
   overflow: hidden;
+  .box-item {
+    color: #fff;
+  }
   .bgImg {
     width: 100%;
     height: 100%;
@@ -58,9 +111,33 @@ let totalCount = computed(() => store.state.pageList.length);
   .canvasBox {
     position: relative;
   }
+  .toolbar {
+    position: fixed;
+    top: 60px;
+    transition: left 0.5s linear;
+    margin-left: 12px;
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
+    &-item {
+      margin: 4px 0;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    &-item:hover {
+      background: #f7f7f7;
+    }
+    .iconfont {
+      font-size: 28px;
+    }
+    .active {
+      color: #3456ff;
+    }
+  }
   .left-action {
     position: fixed;
     bottom: 12px;
+    transition: left 0.5s linear;
     &-left {
       background: #fff;
       padding: 10px 20px;

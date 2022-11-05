@@ -22,4 +22,7 @@ export default {
     });
     state.page = state.pageList.length - 1;
   },
+  changeCurrentType(state: RootStateType, type: string) {
+    state.currentType = type;
+  },
 };

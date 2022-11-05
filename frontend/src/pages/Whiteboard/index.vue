@@ -3,7 +3,6 @@ import Page from "@/components/Page.vue";
 import Board from "@/components/Board.vue";
 import store from "@/store";
 import { ref, computed } from "vue";
-defineProps<{ msg: string }>();
 let pageWidth = computed(() => store.state.pageWidth);
 </script>
 <template>
@@ -27,16 +26,20 @@ let pageWidth = computed(() => store.state.pageWidth);
   display: flex;
   width: 100vw;
   height: 100vh;
+  position: relative;
 
   .page {
-    position: relative;
+    position: absolute;
+    z-index: 100;
     overflow: hidden;
     height: 100%;
     transition: width 0.5s linear;
+    background: #fff;
     border-right: 1px solid #f0f0f0;
   }
   .board {
-    flex: 1;
+    width: 100%;
+    height: 100%;
   }
 }
 </style>
