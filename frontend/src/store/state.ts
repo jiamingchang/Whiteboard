@@ -1,5 +1,10 @@
 import { User } from "@/utils/types";
 
+export const enum StorageKey {
+  TOKEN = "TOKEN",
+  USER_INFO = "USER_INFO",
+}
+
 // state类型的数据
 export interface RootStateType {
   token?: string;
@@ -18,4 +23,13 @@ export interface GlobalState {
   isLogin: boolean;
 }
 
-export default {};
+function state(): RootStateType {
+  let userInfo = JSON.parse(localStorage.getItem(StorageKey.TOKEN) || "{}");
+  return {
+    token: localStorage.getItem(StorageKey.TOKEN) || undefined,
+    userInfo: userInfo,
+    // !!有内容转换成true
+    isLogin: !!localStorage.getItem(StorageKey.TOKEN),
+  };
+}
+export default state;

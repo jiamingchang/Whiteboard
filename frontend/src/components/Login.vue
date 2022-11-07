@@ -1,39 +1,53 @@
 <script setup lang="ts">
-import { defineComponent, reactive, ref } from "vue";
-import { Register } from '@/service/index.ts';
-import { Md5 } from 'ts-md5';
+import { reactive, ref } from "vue";
+import Enter from "@/components/Enter.vue";
+import { Login, Register } from "@/service/index.ts";
+import { Md5 } from "ts-md5";
+import { useStore } from 'vuex'
 // defineProps<{ msg: string }>();
 
-const count = ref(0);
-const isLogin = ref(false);
+const store = useStore();
 const hasUid = ref(true);
 const stateText = ref("");
 
 const userInfo = reactive({
   true_name: "",
-  name: "",
-  password: "",
+  name: "123456",
+  password: "111111",
 });
 
-const handleLogin = () => {
-  hasUid.value = true;
+const handleLogin = async () => {
+  const res = await Login({
+    name: userInfo.name,
+    password: Md5.hashStr(userInfo.password)
+  })
+  console.log(res);
+  if(!res || res.isSuccess == false) {
+    ElMessage.error(res.message || "登录失败");
+    return;
+  }
+  store.state.token = res.token;
+  store.state.islogin = true;
 };
 
 const handleRegister = async () => {
   const res = await Register({
     true_name: userInfo.true_name,
     name: userInfo.name,
-    password: userInfo.password,
-    // password: Md5.hashStr(userInfo.password),
+    password: Md5.hashStr(userInfo.password),
   });
-  if(!res || res.isSuccess == false) {
-    ElMessage.error(res.message || '注册失败')
+  console.log(res);
+  if (!res || res.isSuccess == false) {
+    ElMessage.error(res.message || "注册失败");
+    return;
   }
+  ElMessage('注册成功');
+  hasUid.value = true;
 };
 </script>
 
 <template>
-  <div v-if="isLogin" class="enter"></div>
+  <Enter v-if="store.state.islogin" />
   <div v-else class="content">
     <div class="loginCard">
       <h1>{{ hasUid ? "LOGIN" : "REGISTER" }}</h1>
@@ -44,7 +58,12 @@ const handleRegister = async () => {
           v-model="userInfo.true_name"
           placeholder="昵称"
         />
-        <el-input v-model="userInfo.password" placeholder="密码" />
+        <el-input
+          v-model="userInfo.password"
+          type="password"
+          placeholder="密码"
+          show-password
+        />
       </div>
       <div v-if="hasUid">
         <el-button color="#35456a" @click="handleLogin">登 录</el-button>
@@ -115,13 +134,5 @@ const handleRegister = async () => {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-}
-
-.enter {
-  height: 360px;
-  width: 400px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 3px 8px 15px rgb(157, 157, 157);
 }
 </style>
