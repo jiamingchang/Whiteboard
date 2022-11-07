@@ -18,11 +18,17 @@ export default {
     const pageId = guid();
     state.pageList.push({
       pageId,
-      currpageData: [],
+      currpageData: {
+        canvasString: "",
+      },
     });
     state.page = state.pageList.length - 1;
   },
   changeCurrentType(state: RootStateType, type: string) {
     state.currentType = type;
+  },
+  changeCanvas(state: RootStateType, canvasString: string) {
+    const page = state.page;
+    state.pageList[page].currpageData.canvasString = canvasString;
   },
 };

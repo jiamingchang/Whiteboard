@@ -16,6 +16,9 @@ let isclick = computed(() => (pageWidth.value === 0 ? false : true));
 let currentType = computed(() => store.state.currentType);
 let toggleWidth = useAnimationPageWidth();
 
+// 当前缩放值
+let scale = ref(1);
+
 let currpage = computed(() => store.state.page + 1);
 let totalCount = computed(() => store.state.pageList.length);
 let toolbarData = ref(toolbarOptions);
@@ -32,11 +35,21 @@ watch(
     console.log(val);
   }
 );
+
+// 放大
+const zoomIn = () => {
+  scale.value += 0.1;
+};
+
+// 缩小
+const zoomOut = () => {
+  scale.value -= 0.1;
+};
 </script>
 
 <template>
   <div class="boardContainer">
-    <Canvas />
+    <Canvas :scale="scale" />
     <div
       class="toolbar"
       :style="{
@@ -77,9 +90,15 @@ watch(
     </div>
     <div class="right-action">
       <div class="right-action-items">
-        <div class="right-action-item iconfont icon-jian"></div>
+        <div
+          class="right-action-item iconfont icon-jian"
+          @click="zoomOut"
+        ></div>
         <div class="right-action-item">100%</div>
-        <div class="right-action-item iconfont icon-tianjia"></div>
+        <div
+          class="right-action-item iconfont icon-tianjia"
+          @click="zoomIn"
+        ></div>
         <div
           :class="[
             'right-action-item',

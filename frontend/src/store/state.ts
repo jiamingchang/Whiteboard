@@ -1,10 +1,15 @@
 // state类型的数据
 import { guid } from "@/utils/guid";
-export interface pageListType {}
+
+export interface AllElementType {}
+
+export interface pageListType {
+  canvasString: string;
+}
 
 export interface allPageType {
   pageId: string;
-  currpageData: Array<Partial<pageListType>>;
+  currpageData: pageListType;
 }
 
 export interface RootStateType {
@@ -23,11 +28,15 @@ export default {
   pageList: [
     {
       pageId: guid(),
-      currpageData: [],
+      currpageData: {
+        canvasString: "",
+      },
     },
     {
       pageId: guid(),
-      currpageData: [],
+      currpageData: {
+        canvasString: "",
+      },
     },
   ],
 };

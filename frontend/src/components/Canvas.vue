@@ -1,119 +1,201 @@
 <script setup lang="ts">
 import { useMouse, useMousePressed } from "@vueuse/core";
-import { ref, onMounted, watch } from "vue";
-import { Rectangle } from "@/canvas/type";
+import { ref, onMounted, watch, nextTick, computed, toRaw } from "vue";
+import { fabric } from "fabric";
+import { Circle } from "@/canvas/Circle";
+import { Text } from "@/canvas/Text";
+import { Line } from "@/canvas/Line";
 import store from "@/store";
-import { computed } from "@vue/reactivity";
 
-const canvas = ref();
-const container = ref();
-const { x, y } = useMouse();
-const { pressed } = useMousePressed({ target: canvas });
+// 当前页面画布
+let canvas: any = null; // 画布对象
 
-let currentType = computed(() => store.state.currentType);
+let changeId: any = ref(0);
+let canvas2: any = ref(null);
+let page = computed(() => store.state.page);
 
-let ctx: any = null;
-let mouseDownX = 0;
-let mouseDownY = 0;
-let w = 0;
-let h = 0;
-let activeElement: any = null;
-let allElements: any = [];
-
-const initCanvas = () => {
-  const { width, height } = container.value.getBoundingClientRect();
-  w = width;
-  h = height;
-  canvas.value.width = width;
-  canvas.value.height = height;
-  ctx = canvas.value.getContext("2d");
-  // 将画布的原点由左上角移动到中心点
-  ctx.translate(canvas.value.width / 2, canvas.value.height / 2);
-};
-
-// 检测是否击中了某个元素
-const checkIsHitElement = (x: number, y: number) => {
-  let hitElement = null;
-  // 从后往前遍历元素，即默认认为新的元素在更上层
-  for (let i = allElements.length - 1; i >= 0; i--) {
-    if (allElements[i].isHit(x, y)) {
-      hitElement = allElements[i];
-      break;
-    }
-  }
-  if (hitElement) {
-    alert("击中了矩形");
-  }
-};
-
-const clearCanvas = () => {
-  let width = canvas.value.width;
-  let height = canvas.value.height;
-  ctx.clearRect(-width / 2, -height / 2, width, height);
-};
-
-const renderAllElements = () => {
-  clearCanvas(); // ++
-  allElements.forEach((element: any) => {
-    element.render(ctx, w, h);
-  });
-};
-watch(
-  () => [],
-  () => {}
+let canvasString = computed(
+  () => store.state.pageList[page.value].currpageData.canvasString
 );
+
 watch(
-  () => pressed.value,
+  () => canvasString.value,
   (val) => {
-    // 按住的逻辑
-    if (val) {
-      mouseDownX = x.value;
-      mouseDownY = y.value;
-      if (currentType.value === "selection") {
-        // 选择模式下进行元素激活检测
-        checkIsHitElement(mouseDownX, mouseDownY);
-      }
-    } else {
-      mouseDownX = 0;
-      mouseDownY = 0;
-      activeElement = null;
-    }
+    canvas2.value.loadFromJSON(val);
   }
 );
 
+// 操作者监听画布改变，改变canvasString
 watch(
-  () => [x.value, y.value],
-  () => {
-    // 松开的逻辑
-    if (!pressed.value || currentType.value === "selection") {
-      return;
+  () => changeId.value,
+  (val) => {
+    if (val) {
+      console.log(val);
+      store.commit("changeCanvas", JSON.stringify(canvas));
     }
-    // 矩形不存在就先创建一个
-    if (!activeElement) {
-      activeElement = new Rectangle({
-        x: mouseDownX,
-        y: mouseDownY,
-      });
-      // 加入元素大家庭
-      allElements.push(activeElement);
-    }
-    console.log(allElements);
-    // 更新矩形的大小
-    activeElement.width = x.value - mouseDownX;
-    activeElement.height = y.value - mouseDownY;
-    // 渲染所有的元素
-    renderAllElements();
+  },
+  { deep: true }
+);
+
+let container = ref();
+
+let curElement: any = null;
+
+let currentType = computed(() => store.state.currentType); // 当前操作模式（默认 || 创建圆形）
+
+let downPoint: any = null; // 按下鼠标时的坐标
+let upPoint = null; // 松开鼠标时的坐标
+
+// 初始化画板
+function initCanvas() {
+  const { width, height } = container.value.getBoundingClientRect();
+
+  canvas = new fabric.Canvas("canvas", {
+    width,
+    height: height / 2,
+  });
+
+  canvas2.value = new fabric.Canvas("canvas2", {
+    width,
+    height: height / 2,
+  });
+  canvas.on("mouse:down", canvasMouseDown); // 鼠标在画布上按下
+  canvas.on("mouse:move", canvasMouseMove); // 鼠标在画布上移动
+  canvas.on("mouse:up", canvasMouseUp); // 鼠标在画布上松开
+  canvas.on("object:moving", changeIdFn);
+  canvas.on("object:rotating", changeIdFn);
+  canvas.on("object:scaling", changeIdFn);
+  canvas.on("selection:updated", (e: any) => {
+    console.log(e.target);
+  });
+  canvas.on("selection:created", (e: any) => {
+    console.log(e.target);
+  });
+}
+
+function changeIdFn(e: any) {
+  changeId.value = changeId.value + 1;
+}
+
+watch(
+  () => currentType.value,
+  (val) => {
+    typeChange(val);
   }
 );
+
+// 画布操作类型切换
+function typeChange(opt: any) {
+  switch (opt) {
+    case "selection": // 默认框选模式
+      canvas.selection = true; // 允许框选
+      canvas.selectionColor = "rgba(100, 100, 255, 0.3)"; // 选框填充色：半透明的蓝色
+      canvas.selectionBorderColor = "rgba(255, 255, 255, 0.3)"; // 选框边框颜色：半透明灰色
+      canvas.skipTargetFind = false; // 允许选中
+      canvas.isDrawingMode = false;
+      break;
+    case "rectangle": // 创建矩形模式
+      canvas.selectionColor = "transparent"; // 选框填充色：透明
+      canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
+      canvas.skipTargetFind = true; // 禁止选中
+      canvas.isDrawingMode = false;
+      break;
+    case "paint":
+      canvas.isDrawingMode = true;
+      canvas.selection = false;
+      break;
+    case "text":
+      canvas.isDrawingMode = false;
+      canvas.selection = false;
+      break;
+    case "line":
+      canvas.isDrawingMode = false;
+      canvas.selection = false;
+      break;
+    default:
+      break;
+  }
+}
+
+// 鼠标在画布上按下
+function canvasMouseDown(e: any) {
+  downPoint = e.absolutePointer;
+  if (currentType.value === "rectangle") {
+    // 使用 Fabric.js 提供的api创建圆形，此时圆形的半径是0
+    curElement = new Circle({
+      top: downPoint.y,
+      left: downPoint.x,
+      radius: 0,
+      fill: "transparent",
+      stroke: "rgba(0, 0, 0, 0.2)",
+    });
+    // 初始化
+    curElement.init(canvas);
+    changeId.value = changeId.value + 1;
+  } else if (currentType.value === "text") {
+    if (!e.target) {
+      let textbox = new Text({
+        text: "",
+        left: downPoint.x,
+        top: downPoint.y,
+        padding: 7,
+      });
+      textbox.render(canvas);
+      changeId.value = changeId.value + 1;
+    }
+  } else if (currentType.value === "line") {
+    curElement = new Line({});
+    curElement.init(canvas, downPoint.x, downPoint.y);
+  }
+}
+
+// 鼠标在画布上移动
+function canvasMouseMove(e: any) {
+  const currentPoint = e.absolutePointer;
+  if (currentType.value === "rectangle" && curElement) {
+    // 半径：用短边来计算圆形的直径，最后除以2，得到圆形的半径
+    let radius =
+      Math.min(
+        Math.abs(downPoint.x - currentPoint.x),
+        Math.abs(downPoint.y - currentPoint.y)
+      ) / 2;
+    // 计算圆形的top和left坐标位置
+    let top =
+      currentPoint.y > downPoint.y ? downPoint.y : downPoint.y - radius * 2;
+    let left =
+      currentPoint.x > downPoint.x ? downPoint.x : downPoint.x - radius * 2;
+    curElement.move(canvas, top, left, radius);
+    changeId.value = changeId.value + 1;
+  } else if (currentType.value === "paint") {
+    // changeId.value = changeId.value + 1;
+  } else if (currentType.value === "line" && curElement) {
+    curElement.move(canvas, currentPoint.x, currentPoint.y);
+  }
+}
+
+// 鼠标在画布上松开
+function canvasMouseUp(e: any) {
+  upPoint = e.absolutePointer;
+  if (currentType.value === "rectangle") {
+    curElement.up(canvas, downPoint, upPoint);
+  } else if (currentType.value === "line") {
+    curElement.end();
+  }
+  curElement = null;
+  changeId.value = changeId.value + 1;
+}
 
 onMounted(() => {
-  initCanvas();
+  nextTick(() => {
+    initCanvas();
+  });
 });
 </script>
 
 <template>
   <div class="canvasConatiner" ref="container">
-    <canvas class="box" ref="canvas"></canvas>
+    <canvas ref="canvasRef" id="canvas"></canvas>
+    <canvas id="canvas2"></canvas>
   </div>
 </template>
 
@@ -122,7 +204,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background-image: url("img/grid.svg");
-  .box {
+  #canvas {
     width: 100%;
     height: 100%;
   }

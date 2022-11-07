@@ -2,8 +2,17 @@
 import Page from "@/components/Page.vue";
 import Board from "@/components/Board.vue";
 import store from "@/store";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 let pageWidth = computed(() => store.state.pageWidth);
+let state = computed(() => store.state);
+
+// webscoket总接口
+watch(
+  () => state.value,
+  (val) => {
+    console.log(val);
+  }
+);
 </script>
 <template>
   <div class="whiteboardContainer">
