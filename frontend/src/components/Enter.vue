@@ -36,7 +36,6 @@ const handleEnter = async () => {
     return;
   }
   router.push(Paths.WHITEBOARD);
-  dialogVisible = false;
 };
 
 const logOut = async () => {
