@@ -37,6 +37,14 @@ func Login(c *gin.Context){
 	})
 }
 
+// Auto 自动登录
+func Auto(c *gin.Context){
+	c.JSON(http.StatusOK,gin.H{
+		"isSuccess": true,
+	})
+}
+
+
 // AddUser 注册账号
 func AddUser(c *gin.Context){
 	var json models.User

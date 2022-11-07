@@ -24,6 +24,8 @@ func RoutesController() *gin.Engine {
 
 	v2 := router.Group("/wb/", middleware.AuthRequired())
 	{
+		// 自动登录
+		v2.POST("auto", api.Auto)
 		// 用户注销
 		v2.DELETE("deleteUser", api.DeleteUser)
 		// 获取用户信息
