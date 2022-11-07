@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import Enter from "@/components/Enter.vue";
 import { Login, Register } from "@/service/index.ts";
 import { Md5 } from "ts-md5";
-import { useStore } from 'vuex'
-// defineProps<{ msg: string }>();
+import { useStore } from "vuex";
+import { StorageKey } from "@/store/state.ts";
 
 const store = useStore();
+
 const hasUid = ref(true);
 const stateText = ref("");
 
@@ -17,17 +18,19 @@ const userInfo = reactive({
 });
 
 const handleLogin = async () => {
+  console.log(store.state.isLogin);
+  if (store.state.isLogin) return
   const res = await Login({
     name: userInfo.name,
-    password: Md5.hashStr(userInfo.password)
-  })
-  console.log(res);
-  if(!res || res.isSuccess == false) {
+    password: Md5.hashStr(userInfo.password),
+  });
+  if (!res || res.isSuccess == false) {
     ElMessage.error(res.message || "登录失败");
     return;
   }
-  store.state.token = res.token;
-  store.state.islogin = true;
+  localStorage.setItem(StorageKey.TOKEN, res.token);
+  localStorage.setItem(StorageKey.IS_LOGIN, true);
+  store.state.isLogin = true
 };
 
 const handleRegister = async () => {
@@ -41,13 +44,13 @@ const handleRegister = async () => {
     ElMessage.error(res.message || "注册失败");
     return;
   }
-  ElMessage('注册成功');
+  ElMessage("注册成功");
   hasUid.value = true;
 };
 </script>
 
 <template>
-  <Enter v-if="store.state.islogin" />
+  <Enter v-if="store.state.isLogin" />
   <div v-else class="content">
     <div class="loginCard">
       <h1>{{ hasUid ? "LOGIN" : "REGISTER" }}</h1>

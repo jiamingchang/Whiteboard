@@ -3,13 +3,18 @@ import { ElMessage } from "element-plus";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useStore } from "vuex";
 
+export const enum Paths {
+  LOGIN = '/',
+  WHITEBOARD = '/whiteboard',
+}
+
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
+    path: Paths.LOGIN,
     component: () => import("@/pages/Login/index.vue"),
   },
   {
-    path: "/whiteboard",
+    path: Paths.WHITEBOARD,
     component: () => import("@/pages/Whiteboard/index.vue"),
   },
   {

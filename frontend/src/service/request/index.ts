@@ -36,7 +36,7 @@ tokenRequest.interceptors.request.use(
   (config) => {
     //每次请求携带token、前面、时间戳
     let token = localStorage.getItem("token");
-    config.headers["authorzation"] = token;
+    config.headers["token"] = token;
     return config;
   },
   (err) => {

@@ -16,3 +16,5 @@ export const Register = (data: RegisterReq) => request.post("/wb/addUser", data)
 export const JoinRoom = (data: LoginReq) => tokenRequest.post("/wb/joinRoom", data);
 
 export const CreateRoom = (data: LoginReq) => tokenRequest.post("/wb/createRoom", data);
+
+export const DeleteUser = (data: LoginReq) => tokenRequest.delete("/wb/deleteUser");
