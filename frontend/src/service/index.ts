@@ -1,3 +1,20 @@
-import request from "./request";
+import { request, tokenRequest } from "./request";
 
-export const adminLoginApi = (data: any) => request.post("/admin/login", data);
+interface LoginReq {
+  name: string;
+  password: string;
+}
+
+interface RegisterReq extends LoginReq {
+  true_name: string;
+}
+
+export const Login = (data: LoginReq) => request.post("/wb/login", data);
+
+export const Register = (data: RegisterReq) => request.post("/wb/addUser", data);
+
+export const JoinRoom = (data: LoginReq) => tokenRequest.post("/wb/joinRoom", data);
+
+export const CreateRoom = (data: LoginReq) => tokenRequest.post("/wb/createRoom", data);
+
+export const DeleteUser = (data: LoginReq) => tokenRequest.delete("/wb/deleteUser");
