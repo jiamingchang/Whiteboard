@@ -2,10 +2,10 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Paths } from "@/router/index.ts";
-import { CreateRoom, JoinRoom, DeleteUser } from "@/service/index.ts";
-import { ElMessageBox } from "element-plus";
+import { CreateRoom, JoinRoom, DeleteUser } from "@/service";
+import { ElMessage } from "element-plus";
 import { useStore } from 'vuex'
-import { StorageKey } from "@/store/state.ts";
+import { StorageKey } from "@/store/state";
 
 const store = useStore();
 const router = useRouter();
@@ -44,9 +44,11 @@ const logOut = async () => {
     ElMessage.error(res.message || "加入失败");
     return;
   }
+  ElMessage('账号已退出');
   localStorage.removeItem(StorageKey.TOKEN);
   localStorage.removeItem(StorageKey.IS_LOGIN);
-  store.state.isLogin = false
+  store.state.isLogin = false;
+  console.log(111);
 };
 </script>
 

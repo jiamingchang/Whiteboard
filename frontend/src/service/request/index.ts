@@ -1,11 +1,9 @@
-import { instance } from "@/store";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { BASE_URL, TIME_OUT } from "./config";
 
-//创建一个实例
 const request = axios.create({
-  baseURL: `${BASE_URL}`, //基础路径
-  timeout: TIME_OUT, //请求超时时间
+  baseURL: `${BASE_URL}`,
+  timeout: TIME_OUT,
 });
 
 request.interceptors.request.use(
@@ -34,7 +32,6 @@ const tokenRequest = axios.create({
 //携带token的拦截器
 tokenRequest.interceptors.request.use(
   (config) => {
-    //每次请求携带token、前面、时间戳
     let token = localStorage.getItem("token");
     config.headers["token"] = token;
     return config;

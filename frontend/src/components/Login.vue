@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from "vue";
 import Enter from "@/components/Enter.vue";
-import { Login, Register } from "@/service/index.ts";
+import { ElMessage } from "element-plus";
+import { Login, Register } from "@/service";
 import { Md5 } from "ts-md5";
 import { useStore } from "vuex";
-import { StorageKey } from "@/store/state.ts";
+import { StorageKey } from "@/store/state";
 
 const store = useStore();
 
@@ -30,7 +31,8 @@ const handleLogin = async () => {
   }
   localStorage.setItem(StorageKey.TOKEN, res.token);
   localStorage.setItem(StorageKey.IS_LOGIN, true);
-  store.state.isLogin = true
+  store.state.isLogin = true;
+  ElMessage('登录成功');
 };
 
 const handleRegister = async () => {
