@@ -1,52 +1,36 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { Paths } from "@/router/index.ts";
-import { CreateRoom, JoinRoom, DeleteUser } from "@/service/index.ts";
-import { ElMessageBox } from "element-plus";
-import { useStore } from 'vuex'
-import { StorageKey } from "@/store/state.ts";
-
-const store = useStore();
+import { Paths } from "@/router";
+import { CreateRoom, JoinRoom, DeleteUser, getUser, exitRoom } from "@/service";
+import { ElMessage } from "element-plus";
 const router = useRouter();
 
-const uid = ref(2471648225);
-const isClick = ref(false);
+const uid = ref();
 const dialogVisible = ref(false);
-
 
 const handleCreate = async () => {
   const res = await CreateRoom({
-    read_only: "1",
+    read_only: 1,
   });
-  if (!res || res.isSuccess == false) {
-    ElMessage.error(res.message || "创建失败");
-    return;
-  }
+  ElMessage.success(res.message);
   router.push(Paths.WHITEBOARD);
 };
 
 const handleEnter = async () => {
-  console.log(uid.value);
+  console.log(typeof uid.value);
   const res = await JoinRoom({
-    uid: uid.value,
+    uid: +uid.value,
   });
-  if (!res || res.isSuccess == false) {
-    ElMessage.error(res.message || "加入失败");
-    return;
-  }
+  ElMessage.success(res.message);
   router.push(Paths.WHITEBOARD);
 };
 
 const logOut = async () => {
-  const res = await DeleteUser();
-  if (!res || res.isSuccess == false) {
-    ElMessage.error(res.message || "加入失败");
-    return;
-  }
-  localStorage.removeItem(StorageKey.TOKEN);
-  localStorage.removeItem(StorageKey.IS_LOGIN);
-  store.state.isLogin = false
+  await exitRoom({});
+  // 清除缓存刷新一遍
+  sessionStorage.clear();
+  router.go(0);
 };
 </script>
 

@@ -23,12 +23,6 @@ export default defineConfig({
   base: "/",
   server: {
     port: 8080,
-    proxy: {
-      "/wb": {
-        target: "https://hm.sztufsrlab.com/",
-        changeOrigin: true,
-      },
-    },
   },
   resolve: {
     alias: {
