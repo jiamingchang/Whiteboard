@@ -29,11 +29,17 @@ type cont struct {
 }
 
 // mess 传输的数据
+// ---Code---
+// 100:成功接入ws
+// 101:有用户加入房间
+// 102:房主已退出
+// 103:房主更改房间为只读
+// 104:房主更改房间为协作
+// 105:用户请求更改权限:read_only(1:只读，2:协作)
 type mess struct {
 	Message string `json:"message"`
-
 	Code 	int `json:"code"`
-	System string `json:"system"`
+	System  string `json:"system"`
 }
 
 var conts []cont
@@ -75,7 +81,7 @@ func KeepLive(c *gin.Context) {
 		_ = conn.Close()
 		return
 	}
-	conn.WriteJSON(&mess{System: "成功接入ws"})
+	_ = conn.WriteJSON(&mess{Code: 100, System: "成功接入ws"})
 
 	// 保存上下文
 	addClient(user, conn)
@@ -132,6 +138,11 @@ func SysSend(users []models.User, me mess){
 			writedata(u.ID, me)
 		}
 	}
+}
+
+// SysSendRoomer 系统通知(发送给房主)
+func SysSendRoomer(user models.User, me mess){
+	writedata(user.ID, me)
 }
 
 func addClient(user models.User, conn *websocket.Conn) {

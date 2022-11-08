@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -63,6 +64,14 @@ func (u User)GetRoomUser() []User{
 	return users
 }
 
+// GetRoomer 获取用户所在房间的房主
+func (u User)GetRoomer() User{
+	var room Room
+	db.Model(&Room{}).Preload("WhoAdd").Where("id", u.RoomID).First(&room)
+	fmt.Println(room)
+	return room.WhoAdd
+}
+
 // GetUserRoom 获取用户所在房间
 func (u User)GetUserRoom() (Room, bool){
 	var room Room
@@ -81,9 +90,7 @@ func (u User)ExitRoom() (users []User){
 	}
 	_ = db.Model(&room).Association("Users").Find(&users)
 	if u.ID == room.WhoAdd.ID{
-		_ = db.Model(&users).Updates(map[string]interface{}{
-			"room_id": 0,
-		})
+		_ = db.Model(&room).Association("Users").Clear()
 		db.Delete(&room)
 		return
 	}else {
