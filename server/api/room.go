@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"whiteboard/models"
 )
 
@@ -104,7 +103,13 @@ func AskRoom(c *gin.Context){
 	}
 
 	go func(user models.User) {
-		SysSendRoomer(user.GetRoomer(), mess{Code: 105, System: "用户请求更改权限:"+ strconv.Itoa(int(json.ReadOnly))})
+		msg := "用户请求更改权限:"
+		if json.ReadOnly==1{
+			msg = msg+"只读"
+		}else{
+			msg=msg+"协作"
+		}
+		SysSendRoomer(user.GetRoomer(), mess{Code: 105, System: msg})
 	}(user)
 
 	c.JSON(http.StatusOK,gin.H{
@@ -219,18 +224,28 @@ func ExitRoom(c *gin.Context){
 		})
 		return
 	}
-	users := user.ExitRoom()
-
-	// 发布通知
-	go func(users []models.User){
-		if len(users)>1{
-			SysSend(users, mess{Code: 102, System: "房主已退出"})
-		}
-	}(users)
+	users := user.GetRoomUser()
+	if user.GetRoomer().ID==user.ID {
+		// 发布通知
+		go func(users []models.User){
+			if len(users)>1{
+				SysSend(users, mess{Code: 102, System: "房主已退出"})
+			}
+		}(users)
+	}
+	user.ExitRoom()
 
 	c.JSON(http.StatusOK,gin.H{
 		"code": 200,
 		"message": "退出房间成功",
 		"data": "",
 	})
+}
+
+func GetRoomer(c *gin.Context){
+	user := Current(c)
+	c.JSON(http.StatusOK,gin.H{
+		"data": user.GetRoomer(),
+	})
+
 }

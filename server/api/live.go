@@ -186,25 +186,31 @@ func deleteClient(id uint) {
 
 
 // 服务器心跳机制
-var pingTicker  = time.NewTicker(time.Second * 2)
+var pingTicker = time.NewTicker(time.Second * 5)
 func live() {
 	for {
 		select {
 		case <-pingTicker.C:
-			// 服务端心跳:每2秒ping一次客户端，查看其是否在线
+			// 服务端心跳:每5秒ping一次客户端，查看其是否在线
 			for _, con := range conts {
 				conn := con.conn
-				_ = conn.SetWriteDeadline(time.Now().Add(time.Second * 2))
+				_ = conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
 				err := conn.WriteMessage(websocket.PingMessage, []byte{})
 				if err != nil {
 					log.Println("send ping err:", err)
-					users := con.user.ExitRoom()
-					// 发布通知
-					go func(users []models.User){
-						if len(users)>1{
-							SysSend(users, mess{System: "房主已退出"})
+					go func(con cont) {
+						users := con.user.GetRoomUser()
+						if con.user.GetRoomer().ID==con.user.ID {
+							// 发布通知
+							go func(users []models.User){
+								if len(users)>1{
+									SysSend(users, mess{Code: 102, System: "房主已退出"})
+								}
+							}(users)
 						}
-					}(users)
+						con.user.ExitRoom()
+					}(con)
+
 					deleteClient(con.userid)
 				}
 			}
