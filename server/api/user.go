@@ -22,8 +22,9 @@ func Login(c *gin.Context){
 	user, err := models.Login(json.Name, json.Password)
 	if err != nil {
 		c.JSON(http.StatusOK,gin.H{
-			"isSuccess": false,
+			"code": 500,
 			"message": "用户不存在或密码错误",
+			"data": "",
 		})
 		return
 	}
@@ -32,10 +33,21 @@ func Login(c *gin.Context){
 		log.Println(err)
 	}
 	c.JSON(http.StatusOK,gin.H{
-		"isSuccess": true,
-		"token": token,
+		"code": 200,
+		"message": "登录成功",
+		"data": token,
 	})
 }
+
+// Auto 自动登录
+func Auto(c *gin.Context){
+	c.JSON(http.StatusOK,gin.H{
+		"code": 200,
+		"message": "登录成功",
+		"data": "",
+	})
+}
+
 
 // AddUser 注册账号
 func AddUser(c *gin.Context){
@@ -46,13 +58,16 @@ func AddUser(c *gin.Context){
 	err := models.AddUser(json)
 	if err == nil {
 		c.JSON(http.StatusOK,gin.H{
-			"isSuccess": false,
+			"code": 500,
 			"message": "用户名已存在",
+			"data": "",
 		})
 		return
 	}
 	c.JSON(http.StatusOK,gin.H{
-		"isSuccess": true,
+		"code": 200,
+		"message": "注册成功",
+		"data": "",
 	})
 }
 
@@ -62,13 +77,16 @@ func DeleteUser(c *gin.Context){
 	err := user.DeleteUser()
 	if err != nil {
 		c.JSON(http.StatusOK,gin.H{
-			"isSuccess": false,
+			"code": 500,
 			"message": "用户不存在",
+			"data": "",
 		})
 		return
 	}
 	c.JSON(http.StatusOK,gin.H{
-		"isSuccess": true,
+		"code": 200,
+		"message": "注销成功",
+		"data": "",
 	})
 }
 
@@ -76,6 +94,8 @@ func DeleteUser(c *gin.Context){
 func GetUser(c *gin.Context){
 	user := Current(c)
 	c.JSON(http.StatusOK,gin.H{
-		"user": user,
+		"code": 200,
+		"message": "获取用户信息成功",
+		"data": user,
 	})
 }
