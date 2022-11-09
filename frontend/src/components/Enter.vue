@@ -11,7 +11,7 @@ const dialogVisible = ref(false);
 
 const handleCreate = async () => {
   const res = await CreateRoom({
-    read_only: 1,
+    read_only: 2,
   });
   ElMessage.success(res.message);
   router.push(Paths.WHITEBOARD);

@@ -2,17 +2,60 @@
 import Page from "@/components/Page.vue";
 import Board from "@/components/Board.vue";
 import store from "@/store";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, toRaw, onMounted } from "vue";
+import { StorageKey } from "@/store/state";
 let pageWidth = computed(() => store.state.pageWidth);
 let state = computed(() => store.state);
+let token = sessionStorage.getItem(StorageKey.TOKEN) + "";
+let url = "wss://hm.sztufsrlab.com/wb/live";
+let websocket: any;
 
-// webscoket总接口
+onMounted(() => {
+  connectWebsocket();
+});
+
 watch(
   () => state.value,
   (val) => {
-    console.log(val);
-  }
+    websocket.send(
+      JSON.stringify({
+        message: JSON.stringify(val),
+      })
+    );
+  },
+  { deep: true }
 );
+
+function connectWebsocket() {
+  if (typeof WebSocket === "undefined") {
+    console.log("您的浏览器不支持WebSocket");
+    return;
+  } else {
+    // 打开一个websocket
+    websocket = new WebSocket(url);
+    // 建立连接
+    websocket.onopen = () => {
+      // 打开是发送token
+      websocket.send(
+        JSON.stringify({
+          token,
+        })
+      );
+    };
+    // 客户端接收服务端返回的数据
+    websocket.onmessage = (evt: any) => {
+      console.log("websocket返回的数据：", evt);
+    };
+    // 发生错误时
+    websocket.onerror = (evt: any) => {
+      console.log("websocket错误：", evt);
+    };
+    // 关闭连接
+    websocket.onclose = (evt: any) => {
+      console.log("websocket关闭：", evt);
+    };
+  }
+}
 </script>
 <template>
   <div class="whiteboardContainer">
