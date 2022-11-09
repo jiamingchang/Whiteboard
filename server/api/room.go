@@ -241,11 +241,3 @@ func ExitRoom(c *gin.Context){
 		"data": "",
 	})
 }
-
-func GetRoomer(c *gin.Context){
-	user := Current(c)
-	c.JSON(http.StatusOK,gin.H{
-		"data": user.GetRoomer(),
-	})
-
-}

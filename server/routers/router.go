@@ -45,8 +45,6 @@ func RoutesController() *gin.Engine {
 		v2.POST("joinRoom", api.JoinRoom)
 		// 退出房间
 		v2.POST("exitRoom", api.ExitRoom)
-
-		v2.GET("getRoomer",api.GetRoomer)
 	}
 
 	return router
