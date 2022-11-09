@@ -123,10 +123,15 @@ func writedata(id uint, me mess){
 
 // send 消息处理
 func send(con cont, me mess){
-	users := con.user.GetRoomUser()
-	for _,u := range users{
-		if u.ID != con.userid{
-			writedata(u.ID, me)
+	if room, ok := con.user.GetUserRoom();ok{
+		// 只读(为房主)，或协作
+		if (room.ReadOnly == 1&&con.userid == con.user.GetRoomer().ID)||room.ReadOnly==2 {
+			users := con.user.GetRoomUser()
+			for _, u := range users {
+				if u.ID != con.userid {
+					writedata(u.ID, me)
+				}
+			}
 		}
 	}
 }
