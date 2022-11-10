@@ -6,7 +6,9 @@ import { Text } from "@/canvas/Text";
 import { Line } from "@/canvas/Line";
 import store from "@/store";
 import { ElMessage } from "element-plus";
+import "@/libs/eraser_brush.mixin.js";
 
+// 暴露给父组件的方法
 defineExpose({
   tapHistoryBtn,
 });
@@ -41,7 +43,7 @@ watch(
   () => changeId.value,
   (val) => {
     if (val) {
-      console.log(val);
+      // console.log(val);
       store.commit("changeCanvas", JSON.stringify(canvas));
     }
   },
@@ -77,10 +79,7 @@ function initCanvas() {
   canvas.on("object:rotating", changeIdFn);
   canvas.on("object:scaling", changeIdFn);
   canvas.on("selection:updated", (e: any) => {
-    console.log(e.target);
-  });
-  canvas.on("selection:created", (e: any) => {
-    console.log(e.target);
+    console.log(e);
   });
   canvas.on("after:render", (e: any) => {
     if (stateType !== "withdraw" && stateType !== "reduction") {
@@ -94,6 +93,9 @@ function initCanvas() {
         stateType = "";
       }, 1000);
     }
+  });
+  canvas.on("object:selected", (e: any) => {
+    console.log(e);
   });
 }
 
@@ -161,24 +163,37 @@ function typeChange(opt: any) {
       canvas.selectionBorderColor = "rgba(255, 255, 255, 0.3)"; // 选框边框颜色：半透明灰色
       canvas.skipTargetFind = false; // 允许选中
       canvas.isDrawingMode = false;
+      canvas.freeDrawingBrush.inverted = true;
       break;
     case "rectangle": // 创建矩形模式
       canvas.selectionColor = "transparent"; // 选框填充色：透明
       canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
       canvas.skipTargetFind = true; // 禁止选中
       canvas.isDrawingMode = false;
+      canvas.freeDrawingBrush.inverted = true;
       break;
     case "paint":
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+      canvas.freeDrawingBrush.width = 5;
       canvas.isDrawingMode = true;
-      canvas.selection = false;
       break;
     case "text":
       canvas.isDrawingMode = false;
       canvas.selection = false;
+      canvas.freeDrawingBrush.inverted = true;
       break;
     case "line":
       canvas.isDrawingMode = false;
       canvas.selection = false;
+      canvas.freeDrawingBrush.inverted = true;
+      break;
+    case "eraser":
+      // 启用自由绘画模式
+      canvas.isDrawingMode = true;
+      // 自由绘画模式 画笔类型设置为 橡皮擦对象
+      canvas.freeDrawingBrush = new (fabric as any).EraserBrush(canvas);
+      // 设置橡皮擦大小
+      canvas.freeDrawingBrush.width = 8;
       break;
     default:
       break;
