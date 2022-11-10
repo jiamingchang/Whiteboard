@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { Paths } from "@/router";
 import { CreateRoom, JoinRoom, DeleteUser, exitRoom } from "@/service";
+import { StorageKey } from "@/store/state";
 import { ElMessage } from "element-plus";
 const router = useRouter();
 
@@ -14,6 +15,7 @@ const handleCreate = async () => {
     read_only: 1,
   });
   ElMessage.success(res.message);
+  sessionStorage.setItem(StorageKey.UID, res.data.uid);
   router.push(Paths.WHITEBOARD);
 };
 
