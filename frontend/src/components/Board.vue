@@ -10,6 +10,8 @@ import { toolbarOptions } from "@/enum/toolbar";
 
 const nickname = ref(sessionStorage.getItem(StorageKey.USER_NAME));
 
+const canvas = ref();
+
 // 全屏
 const { isFullscreen, toggle } = useFullscreen();
 // 着色器
@@ -39,6 +41,16 @@ watch(
   }
 );
 
+// 撤回
+const withdraw = () => {
+  canvas.value.tapHistoryBtn(-1, "withdraw");
+};
+
+// 还原
+const reduction = () => {
+  canvas.value.tapHistoryBtn(1, "reduction");
+};
+
 // 放大
 const zoomIn = () => {
   if (scale.value >= 3) {
@@ -56,19 +68,21 @@ const zoomOut = () => {
 
 <template>
   <div class="boardContainer">
-    <Canvas :scale="scale" />
+    <Canvas :scale="scale" ref="canvas" />
     <div
       class="top-action"
       :style="{
         left: pageWidth + 'px',
       }"
     >
-      <div class="top-action-left">
+      <div class="top-action-item">
         <div class="iconfont icon-tuichu"></div>
-        <div class="info">{{ nickname }}的白板</div>
         <div class="iconfont icon-xinxikongxin"></div>
       </div>
-      <div>1231</div>
+      <div class="top-action-item">
+        <div class="iconfont icon-huanyuan" @click="withdraw"></div>
+        <div class="iconfont icon-huanyuan-01" @click="reduction"></div>
+      </div>
     </div>
     <div
       class="toolbar"
@@ -180,7 +194,7 @@ const zoomOut = () => {
     top: 8px;
     transition: left 0.5s linear;
     display: flex;
-    &-left {
+    &-item {
       background: #fff;
       display: flex;
       padding: 10px 20px;
@@ -189,6 +203,17 @@ const zoomOut = () => {
       height: 20px;
       box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
       cursor: pointer;
+      .icon-huanyuan {
+        font-size: 20px;
+      }
+      .icon-huanyuan-01 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-left: 20px;
+      }
+      .iconfont:hover {
+        color: #3456ff;
+      }
     }
     .icon-tuichu {
       font-size: 20px;

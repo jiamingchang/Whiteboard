@@ -5,6 +5,11 @@ import { Circle } from "@/canvas/Circle";
 import { Text } from "@/canvas/Text";
 import { Line } from "@/canvas/Line";
 import store from "@/store";
+import { ElMessage } from "element-plus";
+
+defineExpose({
+  tapHistoryBtn,
+});
 
 // 当前页面画布
 let canvas: any = null; // 画布对象
@@ -52,6 +57,11 @@ let currentType = computed(() => store.state.currentType); // 当前操作模式
 let downPoint: any = null; // 按下鼠标时的坐标
 let upPoint = null; // 松开鼠标时的坐标
 
+let recordTimer: any;
+let stateArr: Object[] = [];
+let stateIdx = 0;
+let stateType = "";
+
 // 初始化画板
 function initCanvas() {
   const { width, height } = container.value.getBoundingClientRect();
@@ -72,6 +82,51 @@ function initCanvas() {
   canvas.on("selection:created", (e: any) => {
     console.log(e.target);
   });
+  canvas.on("after:render", (e: any) => {
+    if (stateType !== "withdraw" && stateType !== "reduction") {
+      if (recordTimer) {
+        clearTimeout(recordTimer);
+        recordTimer = null;
+      }
+      recordTimer = setTimeout(() => {
+        stateArr.push(JSON.stringify(canvas));
+        stateIdx++;
+        stateType = "";
+      }, 1000);
+    }
+  });
+}
+
+// 撤销 或 还原
+function tapHistoryBtn(flag: number, type: string) {
+  stateType = type;
+  stateIdx = stateIdx + flag;
+  console.log(stateIdx, stateArr.length);
+  // 判断是否已经到了第一步操作
+  if (stateIdx < 0) {
+    stateIdx = -1;
+    ElMessage.warning("已经到了第一步！");
+    canvas.clear();
+    return;
+  }
+  if (stateIdx == stateArr.length - 1 && type === "withdraw") {
+    stateIdx = stateIdx - 1;
+  }
+  // 判断是否已经到了最后一步操作
+  if (stateIdx >= stateArr.length) {
+    ElMessage.warning("已经到最后一步！");
+    return;
+  }
+  if (stateArr[stateIdx]) {
+    console.log(stateArr[stateIdx]);
+    canvas.loadFromJSON(stateArr[stateIdx]);
+    if (canvas.getObjects().length > 0) {
+      canvas.getObjects().forEach((item: any) => {
+        item.set("selectable", false);
+      });
+    }
+  }
+  changeId.value = changeId.value + 1;
 }
 
 function changeIdFn(e: any) {
