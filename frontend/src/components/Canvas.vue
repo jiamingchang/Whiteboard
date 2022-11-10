@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useMouse, useMousePressed } from "@vueuse/core";
 import { ref, onMounted, watch, nextTick, computed, toRaw } from "vue";
 import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
@@ -11,17 +10,24 @@ import store from "@/store";
 let canvas: any = null; // 画布对象
 
 let changeId: any = ref(0);
-let canvas2: any = ref(null);
+
 let page = computed(() => store.state.page);
 
 let canvasString = computed(
   () => store.state.pageList[page.value].currpageData.canvasString
 );
 
+const props = defineProps({
+  scale: {
+    type: Number,
+    default: 1,
+  },
+});
+
 watch(
-  () => canvasString.value,
+  () => props.scale,
   (val) => {
-    canvas2.value.loadFromJSON(val);
+    canvas.setZoom(val);
   }
 );
 
@@ -52,12 +58,7 @@ function initCanvas() {
 
   canvas = new fabric.Canvas("canvas", {
     width,
-    height: height / 2,
-  });
-
-  canvas2.value = new fabric.Canvas("canvas2", {
-    width,
-    height: height / 2,
+    height: height,
   });
   canvas.on("mouse:down", canvasMouseDown); // 鼠标在画布上按下
   canvas.on("mouse:move", canvasMouseMove); // 鼠标在画布上移动
@@ -195,7 +196,6 @@ onMounted(() => {
 <template>
   <div class="canvasConatiner" ref="container">
     <canvas ref="canvasRef" id="canvas"></canvas>
-    <canvas id="canvas2"></canvas>
   </div>
 </template>
 

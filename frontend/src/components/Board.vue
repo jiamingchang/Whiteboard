@@ -38,12 +38,16 @@ watch(
 
 // 放大
 const zoomIn = () => {
-  scale.value += 0.1;
+  if (scale.value >= 3) {
+    scale.value = 3;
+  } else scale.value += 0.1;
 };
 
 // 缩小
 const zoomOut = () => {
-  scale.value -= 0.1;
+  if (scale.value <= 0.1) {
+    scale.value = 0.1;
+  } else scale.value -= 0.1;
 };
 </script>
 
@@ -94,7 +98,9 @@ const zoomOut = () => {
           class="right-action-item iconfont icon-jian"
           @click="zoomOut"
         ></div>
-        <div class="right-action-item">100%</div>
+        <div class="right-action-item">
+          {{ parseInt(String(100 * scale)) }}%
+        </div>
         <div
           class="right-action-item iconfont icon-tianjia"
           @click="zoomIn"
