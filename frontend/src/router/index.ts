@@ -1,11 +1,12 @@
 import store from "@/store";
 import { ElMessage } from "element-plus";
+import { StorageKey } from "@/store/state";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useStore } from "vuex";
 
 export const enum Paths {
-  LOGIN = '/',
-  WHITEBOARD = '/whiteboard',
+  LOGIN = "/",
+  WHITEBOARD = "/whiteboard",
 }
 
 const routes: Array<RouteRecordRaw> = [
@@ -31,7 +32,7 @@ const router = createRouter({
 // 对除了登录页外的进行全局守卫
 router.beforeEach(async (to, from, next) => {
   if (to.path !== "/") {
-    let { isLogin } = store.state;
+    let isLogin = sessionStorage.getItem(StorageKey.TOKEN);
     if (!isLogin) {
       ElMessage.error("还未登录哦");
       next("/");

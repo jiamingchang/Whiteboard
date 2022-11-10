@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from "vue";
 import Enter from "@/components/Enter.vue";
-import { ElMessage } from "element-plus";
 import { Login, Register } from "@/service";
 import { Md5 } from "ts-md5";
-import { useStore } from "vuex";
 import { StorageKey } from "@/store/state";
-
-const store = useStore();
+import { ElMessage } from "element-plus";
 
 const hasUid = ref(true);
-const stateText = ref("");
+
+// 登入临时值
+const isTmpLogin = ref(false);
+
+// 登入状态，以防刷新，这个差不多就是uselocalStroage的实现方式
+const isLogin = computed(() =>
+  isTmpLogin.value || sessionStorage.getItem(StorageKey.TOKEN) ? true : false
+);
 
 const userInfo = reactive({
   true_name: "",
@@ -18,41 +22,29 @@ const userInfo = reactive({
   password: "111111",
 });
 
+// 登入
 const handleLogin = async () => {
-  console.log(store.state.isLogin);
-  if (store.state.isLogin) return
   const res = await Login({
     name: userInfo.name,
     password: Md5.hashStr(userInfo.password),
   });
-  if (!res || res.isSuccess == false) {
-    ElMessage.error(res.message || "登录失败");
-    return;
-  }
-  localStorage.setItem(StorageKey.TOKEN, res.token);
-  localStorage.setItem(StorageKey.IS_LOGIN, true);
-  store.state.isLogin = true;
-  ElMessage('登录成功');
+  sessionStorage.setItem(StorageKey.TOKEN, res.data as string);
+  isTmpLogin.value = true;
 };
 
+// 注册
 const handleRegister = async () => {
   const res = await Register({
     true_name: userInfo.true_name,
     name: userInfo.name,
     password: Md5.hashStr(userInfo.password),
   });
-  console.log(res);
-  if (!res || res.isSuccess == false) {
-    ElMessage.error(res.message || "注册失败");
-    return;
-  }
-  ElMessage("注册成功");
-  hasUid.value = true;
+  ElMessage.success(res.message);
 };
 </script>
 
 <template>
-  <Enter v-if="store.state.isLogin" />
+  <Enter v-if="isLogin" />
   <div v-else class="content">
     <div class="loginCard">
       <h1>{{ hasUid ? "LOGIN" : "REGISTER" }}</h1>

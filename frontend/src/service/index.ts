@@ -1,4 +1,4 @@
-import { request, tokenRequest } from "./request";
+import { request } from "./request";
 
 interface LoginReq {
   name: string;
@@ -9,20 +9,46 @@ interface RegisterReq extends LoginReq {
   true_name: string;
 }
 
-interface JoinRoomReq {
-  uid: number;
-}
+export const Login = (data: LoginReq) =>
+  request({
+    url: "/wb/login",
+    method: "POST",
+    data,
+  });
 
-interface CreateRoomReq {
-  read_only: number
-}
+export const Register = (data: RegisterReq) =>
+  request({
+    url: "/wb/addUser",
+    method: "POST",
+    data,
+  });
 
-export const Login = (data: LoginReq) => request.post("/wb/login", data);
+export const JoinRoom = (data: any) =>
+  request({
+    url: "/wb/joinRoom",
+    method: "POST",
+    data,
+  });
 
-export const Register = (data: RegisterReq) => request.post("/wb/addUser", data);
+export const CreateRoom = (data: any) =>
+  request({
+    url: "/wb/createRoom",
+    method: "POST",
+    data,
+  });
 
-export const JoinRoom = (data:  JoinRoomReq) => tokenRequest.post("/wb/joinRoom", data);
+export const getUser = (data: any) =>
+  request({
+    url: "/wb/getUser",
+    method: "GET",
+  });
 
-export const CreateRoom = (data: CreateRoomReq) => tokenRequest.post("/wb/createRoom", data);
+export const DeleteUser = (data: any) =>
+  request({
+    url: "/wb/deleteUser",
+    method: "DELETE",
+    data,
+  });
 
-export const DeleteUser = () => tokenRequest.delete("/wb/deleteUser");
+export const exitRoom = (data: any) =>
+  request({ url: "/wb/exitRoom", method: "POST", data });

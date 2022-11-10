@@ -2,11 +2,10 @@
 import { guid } from "@/utils/guid";
 import { User } from "@/utils/types";
 
-
 export const enum StorageKey {
   TOKEN = "TOKEN",
   USER_INFO = "USER_INFO",
-  IS_LOGIN = "IS_LOGIN"
+  IS_LOGIN = "IS_LOGIN",
 }
 
 export interface AllElementType {}
@@ -67,5 +66,3 @@ export default {
   // !!有内容转换成true
   isLogin: !!localStorage.getItem(StorageKey.IS_LOGIN),
 };
-
-
