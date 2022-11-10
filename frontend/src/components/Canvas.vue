@@ -2,6 +2,7 @@
 import { ref, onMounted, watch, nextTick, computed, toRaw } from "vue";
 import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
+import { Rectangle } from "@/canvas/Rect";
 import { Text } from "@/canvas/Text";
 import { Line } from "@/canvas/Line";
 import store from "@/store";
@@ -63,6 +64,8 @@ let recordTimer: any;
 let stateArr: Object[] = [];
 let stateIdx = 0;
 let stateType = "";
+
+let isDragging = false;
 
 // 初始化画板
 function initCanvas() {
@@ -135,17 +138,6 @@ function changeIdFn(e: any) {
   changeId.value = changeId.value + 1;
 }
 
-// 因为画布会进行移动或缩放，所以鼠标在画布上的坐标需要进行相应的处理才是相对于画布的可用坐标
-function getTransformedPosX(x: number) {
-  let zoom = Number(canvas.getZoom());
-  return (x - canvas.viewportTransform[4]) / zoom;
-}
-
-function getTransformedPosY(y: number) {
-  let zoom = Number(canvas.getZoom());
-  return (y - canvas.viewportTransform[5]) / zoom;
-}
-
 // 监听改变type
 watch(
   () => currentType.value,
@@ -166,6 +158,7 @@ function typeChange(opt: any) {
       canvas.freeDrawingBrush.inverted = true;
       break;
     case "rectangle": // 创建矩形模式
+    case "circle":
       canvas.selectionColor = "transparent"; // 选框填充色：透明
       canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
       canvas.skipTargetFind = true; // 禁止选中
@@ -195,6 +188,11 @@ function typeChange(opt: any) {
       // 设置橡皮擦大小
       canvas.freeDrawingBrush.width = 8;
       break;
+    case "grab":
+      canvas.isDrawingMode = false;
+      canvas.selection = false;
+      canvas.freeDrawingBrush.inverted = true;
+      break;
     default:
       break;
   }
@@ -203,14 +201,14 @@ function typeChange(opt: any) {
 // 鼠标在画布上按下
 function canvasMouseDown(e: any) {
   downPoint = e.absolutePointer;
-  if (currentType.value === "rectangle") {
+  if (currentType.value === "circle") {
     // 使用 Fabric.js 提供的api创建圆形，此时圆形的半径是0
     curElement = new Circle({
       top: downPoint.y,
       left: downPoint.x,
       radius: 0,
       fill: "transparent",
-      stroke: "rgba(0, 0, 0, 0.2)",
+      stroke: "rgba(0, 0, 0, 0.5)",
     });
     // 初始化
     curElement.init(canvas);
@@ -229,13 +227,19 @@ function canvasMouseDown(e: any) {
   } else if (currentType.value === "line") {
     curElement = new Line({});
     curElement.init(canvas, downPoint.x, downPoint.y);
+  } else if (currentType.value === "grab") {
+    isDragging = true;
+    canvas.selection = false;
+  } else if (currentType.value === "rectangle") {
+    curElement = new Rectangle();
+    curElement.init(canvas, downPoint.x, downPoint.y);
   }
 }
 
 // 鼠标在画布上移动
 function canvasMouseMove(e: any) {
   const currentPoint = e.absolutePointer;
-  if (currentType.value === "rectangle" && curElement) {
+  if (currentType.value === "circle" && curElement) {
     // 半径：用短边来计算圆形的直径，最后除以2，得到圆形的半径
     let radius =
       Math.min(
@@ -253,15 +257,32 @@ function canvasMouseMove(e: any) {
     // changeId.value = changeId.value + 1;
   } else if (currentType.value === "line" && curElement) {
     curElement.move(canvas, currentPoint.x, currentPoint.y);
+  } else if (currentType.value === "grab" && isDragging) {
+    var opt = canvas.viewportTransform;
+    opt[4] += currentPoint.x - downPoint.x;
+    opt[5] += currentPoint.y - downPoint.y;
+    canvas.requestRenderAll();
+  } else if (currentType.value === "rectangle" && curElement) {
+    curElement.move(
+      canvas,
+      currentPoint.x - downPoint.x,
+      currentPoint.y - downPoint.y
+    );
   }
 }
 
 // 鼠标在画布上松开
 function canvasMouseUp(e: any) {
   upPoint = e.absolutePointer;
-  if (currentType.value === "rectangle") {
+  if (currentType.value === "circle") {
     curElement.up(canvas, downPoint, upPoint);
   } else if (currentType.value === "line") {
+    curElement.end();
+  } else if (currentType.value === "grab") {
+    isDragging = false;
+    canvas.setViewportTransform(canvas.viewportTransform);
+    canvas.selection = true;
+  } else if (currentType.value === "rectangle") {
     curElement.end();
   }
   curElement = null;
