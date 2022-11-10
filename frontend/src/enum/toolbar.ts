@@ -7,7 +7,7 @@ export const toolbarOptions = [
   },
   {
     key: 2,
-    tips: "矩形",
+    tips: "形状",
     iconClass: "iconfont icon-xingzhuang-juxing",
     type: "rectangle",
   },

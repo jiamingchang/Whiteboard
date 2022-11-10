@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { Paths } from "@/router";
-import { CreateRoom, JoinRoom, DeleteUser, getUser, exitRoom } from "@/service";
+import { CreateRoom, JoinRoom, DeleteUser, exitRoom } from "@/service";
 import { ElMessage } from "element-plus";
 const router = useRouter();
 
@@ -27,7 +27,11 @@ const handleEnter = async () => {
 };
 
 const logOut = async () => {
-  await exitRoom({});
+  try {
+    await exitRoom({});
+  } catch (err) {
+    console.log(err);
+  }
   // 清除缓存刷新一遍
   sessionStorage.clear();
   router.go(0);

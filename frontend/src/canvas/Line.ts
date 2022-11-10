@@ -1,33 +1,33 @@
 import { fabric } from "fabric";
-let line: any = null;
+let line: any;
 export class Line {
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
   constructor(opt: any) {
-    this.startX = opt.startX || 0;
-    this.startY = opt.startY || 0;
-    this.endX = opt.endX || 0;
-    this.endY = opt.endY || 0;
+    this.x1 = opt.x1 || 0;
+    this.y1 = opt.y1 || 0;
+    this.x2 = opt.x2 || 0;
+    this.y2 = opt.y2 || 0;
   }
-  init(canvas: any, x: number, y: number) {
-    this.startX = this.endX = x;
-    this.startY = this.endY = y;
-    line = new fabric.Line([x, y, x, y]);
+  init(canvas: any, x1: number, y1: number) {
+    this.x1 = x1;
+    this.y1 = y1;
+    line = new fabric.Line([x1, y1, x1, y1], {
+      stroke: "#000",
+      strokeWidth: 2,
+    });
     canvas.add(line);
   }
-  move(canvas: any, x: number, y: number) {
-    line.set("x2", x);
-    line.set("y2", y);
-
+  move(canvas: any, x2: number, y2: number) {
+    this.x2 = x2;
+    this.y2 = y2;
+    line.set("x2", x2);
+    line.set("y2", y2);
     canvas.requestRenderAll();
   }
   end() {
-    if (line) {
-      // 创建圆形（其实是把圆形边框的颜色改成 #000
-      line.set("stroke", "#000");
-    }
     line = null;
   }
 }

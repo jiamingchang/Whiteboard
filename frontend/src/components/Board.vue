@@ -2,10 +2,13 @@
 import Canvas from "./Canvas.vue";
 import { computed, ref, watch } from "vue";
 import store from "@/store";
+import { StorageKey } from "@/store/state";
 import { useEyeDropper } from "@vueuse/core";
 import { useAnimationPageWidth } from "@/utils/hooks";
 import { useFullscreen } from "@vueuse/core";
 import { toolbarOptions } from "@/enum/toolbar";
+
+const nickname = ref(sessionStorage.getItem(StorageKey.USER_NAME));
 
 // 全屏
 const { isFullscreen, toggle } = useFullscreen();
@@ -38,18 +41,35 @@ watch(
 
 // 放大
 const zoomIn = () => {
-  scale.value += 0.1;
+  if (scale.value >= 3) {
+    scale.value = 3;
+  } else scale.value += 0.1;
 };
 
 // 缩小
 const zoomOut = () => {
-  scale.value -= 0.1;
+  if (scale.value <= 0.1) {
+    scale.value = 0.1;
+  } else scale.value -= 0.1;
 };
 </script>
 
 <template>
   <div class="boardContainer">
     <Canvas :scale="scale" />
+    <div
+      class="top-action"
+      :style="{
+        left: pageWidth + 'px',
+      }"
+    >
+      <div class="top-action-left">
+        <div class="iconfont icon-tuichu"></div>
+        <div class="info">{{ nickname }}的白板</div>
+        <div class="iconfont icon-xinxikongxin"></div>
+      </div>
+      <div>1231</div>
+    </div>
     <div
       class="toolbar"
       :style="{
@@ -94,7 +114,9 @@ const zoomOut = () => {
           class="right-action-item iconfont icon-jian"
           @click="zoomOut"
         ></div>
-        <div class="right-action-item">100%</div>
+        <div class="right-action-item">
+          {{ parseInt(String(100 * scale)) }}%
+        </div>
         <div
           class="right-action-item iconfont icon-tianjia"
           @click="zoomIn"
@@ -132,7 +154,7 @@ const zoomOut = () => {
   }
   .toolbar {
     position: fixed;
-    top: 60px;
+    top: 90px;
     transition: left 0.5s linear;
     margin-left: 12px;
     background: #fff;
@@ -151,6 +173,31 @@ const zoomOut = () => {
     }
     .active {
       color: #3456ff;
+    }
+  }
+  .top-action {
+    position: fixed;
+    top: 8px;
+    transition: left 0.5s linear;
+    display: flex;
+    &-left {
+      background: #fff;
+      display: flex;
+      padding: 10px 20px;
+      align-items: center;
+      margin-left: 12px;
+      height: 20px;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
+      cursor: pointer;
+    }
+    .icon-tuichu {
+      font-size: 20px;
+    }
+    .info {
+      margin-left: 10px;
+    }
+    .icon-xinxikongxin {
+      margin-left: 10px;
     }
   }
   .left-action {
@@ -180,7 +227,6 @@ const zoomOut = () => {
     box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
     &-items {
       text-align: center;
-      display: flex;
       display: flex;
       .iconfont {
         font-size: 20px;
