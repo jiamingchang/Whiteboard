@@ -4,8 +4,7 @@ import { User } from "@/utils/types";
 
 export const enum StorageKey {
   TOKEN = "TOKEN",
-  USER_INFO = "USER_INFO",
-  IS_LOGIN = "IS_LOGIN",
+  USER_NAME = "USER_NAME",
 }
 
 export interface AllElementType {}

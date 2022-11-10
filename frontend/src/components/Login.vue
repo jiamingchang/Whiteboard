@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref, computed } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 import Enter from "@/components/Enter.vue";
-import { Login, Register } from "@/service";
+import { Login, Register, getUser } from "@/service";
 import { Md5 } from "ts-md5";
 import { StorageKey } from "@/store/state";
 import { ElMessage } from "element-plus";
@@ -14,6 +14,18 @@ const isTmpLogin = ref(false);
 // 登入状态，以防刷新，这个差不多就是uselocalStroage的实现方式
 const isLogin = computed(() =>
   isTmpLogin.value || sessionStorage.getItem(StorageKey.TOKEN) ? true : false
+);
+
+// 登入成功存取用户信息
+watch(
+  () => isLogin.value,
+  (val) => {
+    if (val) {
+      getUser({}).then((res) => {
+        sessionStorage.setItem(StorageKey.USER_NAME, (res.data as any).name);
+      });
+    }
+  }
 );
 
 const userInfo = reactive({
