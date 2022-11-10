@@ -62,8 +62,4 @@ export default {
       },
     },
   ],
-  token: localStorage.getItem(StorageKey.TOKEN) || undefined,
-  userInfo: JSON.parse(localStorage.getItem(StorageKey.USER_INFO) || "{}"),
-  // !!有内容转换成true
-  isLogin: !!localStorage.getItem(StorageKey.IS_LOGIN),
 };
