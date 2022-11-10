@@ -78,6 +78,18 @@ function changeIdFn(e: any) {
   changeId.value = changeId.value + 1;
 }
 
+// 因为画布会进行移动或缩放，所以鼠标在画布上的坐标需要进行相应的处理才是相对于画布的可用坐标
+function getTransformedPosX(x: number) {
+  let zoom = Number(canvas.getZoom());
+  return (x - canvas.viewportTransform[4]) / zoom;
+}
+
+function getTransformedPosY(y: number) {
+  let zoom = Number(canvas.getZoom());
+  return (y - canvas.viewportTransform[5]) / zoom;
+}
+
+// 监听改变type
 watch(
   () => currentType.value,
   (val) => {
