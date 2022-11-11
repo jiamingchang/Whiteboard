@@ -98,7 +98,6 @@
 
 <style scoped lang="scss">
   .enter {
-    height: 450px;
     width: 600px;
     color: aliceblue;
     background-color: #5169a3;
@@ -114,7 +113,7 @@
 
   .content {
     width: 380px;
-    height: 350px;
+    margin: 30px 0;
     display: flex;
     flex-direction: row;
     align-items: center;
