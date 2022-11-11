@@ -3,15 +3,19 @@ import { ref, onMounted, watch, nextTick, computed, toRaw } from "vue";
 import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
 import { Rectangle } from "@/canvas/Rect";
-import { Text } from "@/canvas/Text";
 import { Line } from "@/canvas/Line";
 import store from "@/store";
 import { ElMessage } from "element-plus";
+import { useMagicKeys } from "@vueuse/core";
+
 import "@/libs/eraser_brush.mixin.js";
+
+const { enter } = useMagicKeys();
 
 // 暴露给父组件的方法
 defineExpose({
   tapHistoryBtn,
+  setImage,
 });
 
 // 当前页面画布
@@ -38,6 +42,43 @@ watch(
     canvas.setZoom(val);
   }
 );
+
+watch(
+  () => enter.value,
+  (val) => {
+    console.log(val);
+  }
+);
+
+//
+function setImage(e: any) {
+  // 上传文件列表的第一个文件
+  const file = e.target.files[0];
+  // 图片文件的地址
+  let imgPath = null;
+  // 获取图片文件真实路径
+  // 由于浏览器安全策略，现在需要这么做了
+  // 这段代码是网上复制下来的，想深入理解的可以百度搜搜 “C:\fakepath\”
+  if (window.createObjcectURL != undefined) {
+    imgPath = window.createOjcectURL(file);
+  } else if (window.URL != undefined) {
+    imgPath = window.URL.createObjectURL(file);
+  } else if (window.webkitURL != undefined) {
+    imgPath = window.webkitURL.createObjectURL(file);
+  }
+  console.log(imgPath);
+  // // 设置画布背景，并刷新画布
+  fabric.Image.fromURL(
+    imgPath,
+    function (oImg) {
+      // scale image down, and flip it, before adding it onto canvas
+      oImg.scale(0.2).set("left", 100).set("top", 100);
+      canvas.add(oImg);
+    },
+    { crossOrigin: "anonymous" }
+  );
+  e.target.value = "";
+}
 
 // 操作者监听画布改变，改变canvasString
 watch(
@@ -78,7 +119,7 @@ function initCanvas() {
   canvas.on("mouse:down", canvasMouseDown); // 鼠标在画布上按下
   canvas.on("mouse:move", canvasMouseMove); // 鼠标在画布上移动
   canvas.on("mouse:up", canvasMouseUp); // 鼠标在画布上松开
-  canvas.on("object:moving", changeIdFn);
+  canvas.on("object:moving", objectMove);
   canvas.on("object:rotating", changeIdFn);
   canvas.on("object:scaling", changeIdFn);
   canvas.on("selection:updated", (e: any) => {
@@ -100,6 +141,11 @@ function initCanvas() {
   canvas.on("object:selected", (e: any) => {
     console.log(e);
   });
+}
+
+function objectMove(e: any) {
+  clearText();
+  changeIdFn(e);
 }
 
 // 撤销 或 还原
@@ -138,6 +184,45 @@ function changeIdFn(e: any) {
   changeId.value = changeId.value + 1;
 }
 
+let textObj: any;
+
+function drawText() {
+  if (!textObj) {
+    // 当前不存在绘制中的文本对象，鼠标第一次按下
+
+    // 根据鼠标按下的起点坐标文本对象
+    textObj = new fabric.Textbox("", {
+      left: downPoint.x,
+      top: downPoint.y,
+      fontSize: 18,
+      hasControls: false,
+      editable: true,
+      width: 30,
+      backgroundColor: "#fff",
+    });
+    canvas.add(textObj);
+    // 文本打开编辑模式
+    textObj.enterEditing();
+    // 文本编辑框获取焦点
+    textObj.hiddenTextarea.focus();
+  } else {
+    // 鼠标第二次按下 将当前文本对象退出编辑模式
+    clearText();
+  }
+}
+
+function clearText() {
+  if (textObj) {
+    textObj.exitEditing();
+    textObj.set("backgroundColor", "rgba(0,0,0,0)");
+    if (textObj.text == "") {
+      canvas.remove(textObj);
+    }
+    canvas.renderAll();
+    textObj = null;
+  }
+}
+
 // 监听改变type
 watch(
   () => currentType.value,
@@ -172,7 +257,7 @@ function typeChange(opt: any) {
       break;
     case "text":
       canvas.isDrawingMode = false;
-      canvas.selection = false;
+      // canvas.selection = false;
       canvas.freeDrawingBrush.inverted = true;
       break;
     case "line":
@@ -214,16 +299,7 @@ function canvasMouseDown(e: any) {
     curElement.init(canvas);
     changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
-    if (!e.target) {
-      let textbox = new Text({
-        text: "",
-        left: downPoint.x,
-        top: downPoint.y,
-        padding: 7,
-      });
-      textbox.render(canvas);
-      changeId.value = changeId.value + 1;
-    }
+    drawText();
   } else if (currentType.value === "line") {
     curElement = new Line({});
     curElement.init(canvas, downPoint.x, downPoint.y);
@@ -253,7 +329,7 @@ function canvasMouseMove(e: any) {
       currentPoint.x > downPoint.x ? downPoint.x : downPoint.x - radius * 2;
     curElement.move(canvas, top, left, radius);
     changeId.value = changeId.value + 1;
-  } else if (currentType.value === "paint") {
+  } else if (currentType.value === "text") {
     // changeId.value = changeId.value + 1;
   } else if (currentType.value === "line" && curElement) {
     curElement.move(canvas, currentPoint.x, currentPoint.y);

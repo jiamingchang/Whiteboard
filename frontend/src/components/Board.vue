@@ -96,6 +96,10 @@ const changeShape = (type: string) => {
   };
   store.commit("changeCurrentType", type);
 };
+
+const handleUpload = (e: any) => {
+  canvas.value.setImage(e);
+};
 </script>
 
 <template>
@@ -136,7 +140,15 @@ const changeShape = (type: string) => {
           <div
             :class="[item.iconClass, item.type === currentType ? 'active' : '']"
             @mousemove="mouseMoveHandle(item.type)"
-          ></div>
+          >
+            <input
+              type="file"
+              class="input"
+              @change="handleUpload"
+              v-if="item.type === 'upload'"
+              accept="image/*"
+            />
+          </div>
         </el-tooltip>
       </div>
     </div>
@@ -214,6 +226,17 @@ const changeShape = (type: string) => {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  .icon-shangchuanwenjian {
+    position: relative;
+    overflow: hidden;
+  }
+  .input {
+    z-index: 1;
+    opacity: 0;
+    left: 0;
+    width: 100%;
+    position: absolute;
+  }
   .box-item {
     color: #fff;
   }
