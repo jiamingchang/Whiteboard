@@ -29,16 +29,6 @@
     router.push(Paths.WHITEBOARD);
   };
 
-  const handleEnterMyself = async () => {
-    console.log(99, +sessionStorage.getItem(StorageKey.UID));
-    const res = await JoinRoom({
-      uid: +sessionStorage.getItem(StorageKey.UID),
-    });
-    ElMessage.success(res.message);
-    isExistRoom.value = true;
-    router.push(Paths.WHITEBOARD);
-  };
-
   const handleExit = async () => {
     const res = await exitRoom();
     ElMessage.success(res.message);
@@ -68,13 +58,12 @@
       </el-button>
     </div>
     <div class="content2">
-      <el-button v-if="isExistRoom" color="#35456a" class="button iconfont icon-yitingyong" @click="handleEnterMyself">
+      <el-button v-if="isExistRoom" color="#35456a" class="button" @click="router.go(1)">
         我的白板
       </el-button>
-      <el-button v-if="isExistRoom"  color="#35456a" class="button" @click="handleExit">
+      <el-button v-if="isExistRoom" color="#35456a" class="button" @click="handleExit">
         退出所在房间
       </el-button>
-      
     </div>
 
     <el-dialog v-model="dialogVisible" title="项目ID" width="300px" align-center draggable>
