@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     ElButton: typeof import('element-plus/es')['ElButton']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Enter: typeof import('./src/components/Enter.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']

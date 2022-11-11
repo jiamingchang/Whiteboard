@@ -42,6 +42,7 @@ const handleLogin = async () => {
   });
   sessionStorage.setItem(StorageKey.TOKEN, res.data as string);
   isTmpLogin.value = true;
+  ElMessage.success('登录成功')
 };
 
 // 注册
