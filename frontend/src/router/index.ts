@@ -33,8 +33,14 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (to.path !== "/") {
     let isLogin = sessionStorage.getItem(StorageKey.TOKEN);
+    let uid = sessionStorage.getItem(StorageKey.UID);
     if (!isLogin) {
       ElMessage.error("还未登录哦");
+      next("/");
+      return;
+    }
+    if(!uid) {
+      ElMessage.error("没有进入任何房间哦");
       next("/");
       return;
     }

@@ -52,3 +52,9 @@ export const DeleteUser = (data: any) =>
 
 export const exitRoom = (data: any) =>
   request({ url: "/wb/exitRoom", method: "POST", data });
+
+export const GetUserRoom = (data: any) =>
+  request({
+    url: "/wb/getUserRoom",
+    method: "GET",
+  });

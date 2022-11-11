@@ -2,13 +2,14 @@
   import { ref } from "vue";
   import { useRouter } from "vue-router";
   import { Paths } from "@/router";
-  import { CreateRoom, JoinRoom, DeleteUser, exitRoom } from "@/service";
+  import { CreateRoom, JoinRoom, DeleteUser, exitRoom, GetUserRoom } from "@/service";
   import { StorageKey } from "@/store/state";
   import { ElMessage } from "element-plus";
   const router = useRouter();
 
   const uid = ref();
   const dialogVisible = ref(false);
+  const isExistRoom = ref(sessionStorage.getItem(StorageKey.UID));
 
   const handleCreate = async () => {
     const res = await CreateRoom({
@@ -28,9 +29,26 @@
     router.push(Paths.WHITEBOARD);
   };
 
+  const handleEnterMyself = async () => {
+    console.log(99, +sessionStorage.getItem(StorageKey.UID));
+    const res = await JoinRoom({
+      uid: +sessionStorage.getItem(StorageKey.UID),
+    });
+    ElMessage.success(res.message);
+    isExistRoom.value = true;
+    router.push(Paths.WHITEBOARD);
+  };
+
+  const handleExit = async () => {
+    const res = await exitRoom();
+    ElMessage.success(res.message);
+    sessionStorage.removeItem(StorageKey.UID);
+    isExistRoom.value = false;
+  };
+
   const logOut = async () => {
     try {
-      await exitRoom({});
+      await DeleteUser({});
     } catch (err) {
       console.log(err);
     }
@@ -44,10 +62,19 @@
   <div class="enter">
     <h1>已登录</h1>
     <div class="content">
-      <el-button color="#35456a" class="button" @click="handleCreate">创建白板</el-button>
+      <el-button color="#35456a" class="button iconfont icon-tianjia" @click="handleCreate">创建白板</el-button>
       <el-button color="#35456a" class="button" @click="dialogVisible = true">
-        加入白板
+        房间号加入
       </el-button>
+    </div>
+    <div class="content2">
+      <el-button v-if="isExistRoom" color="#35456a" class="button iconfont icon-yitingyong" @click="handleEnterMyself">
+        我的白板
+      </el-button>
+      <el-button v-if="isExistRoom"  color="#35456a" class="button" @click="handleExit">
+        退出所在房间
+      </el-button>
+      
     </div>
 
     <el-dialog v-model="dialogVisible" title="项目ID" width="300px" align-center draggable>
@@ -61,9 +88,9 @@
     </el-dialog>
 
     <el-popconfirm confirm-button-text="确认" cancel-button-text="取消" :icon="InfoFilled" icon-color="#626AEF"
-      title="确认退出吗？" @confirm="logOut" @cancel="cancelEvent">
+      title="确认注销吗？" @confirm="logOut" @cancel="cancelEvent">
       <template #reference>
-        <el-button class="logout">退出登录-</el-button>
+        <el-button class="logout">注销账号</el-button>
       </template>
     </el-popconfirm>
   </div>
@@ -71,8 +98,8 @@
 
 <style scoped lang="scss">
   .enter {
-    height: 360px;
-    width: 500px;
+    height: 450px;
+    width: 600px;
     color: aliceblue;
     background-color: #5169a3;
     border-radius: 10px;
@@ -86,8 +113,8 @@
   }
 
   .content {
-    width: 300px;
-    height: 270px;
+    width: 380px;
+    height: 350px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -95,15 +122,15 @@
   }
 
   .button {
-    height: 120px;
-    width: 140px;
+    height: 100px;
+    width: 150px;
   }
 
   .logout {
     height: 18px;
     width: 60px;
     font-size: 12px;
-    margin-top: 10px;
+    margin-top: 40px;
   }
 
   .dialog-footer button:first-child {
