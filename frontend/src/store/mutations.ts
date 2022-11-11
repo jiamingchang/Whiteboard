@@ -31,4 +31,8 @@ export default {
     const page = state.page;
     state.pageList[page].currpageData.canvasString = canvasString;
   },
+  changePageList(state: RootStateType, newPageList: any) {
+    console.log("改变当前页面，wsxxxx");
+    state.pageList = [...newPageList];
+  },
 };

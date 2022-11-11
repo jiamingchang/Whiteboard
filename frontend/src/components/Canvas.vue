@@ -6,11 +6,7 @@ import { Rectangle } from "@/canvas/Rect";
 import { Line } from "@/canvas/Line";
 import store from "@/store";
 import { ElMessage } from "element-plus";
-import { useMagicKeys } from "@vueuse/core";
-
 import "@/libs/eraser_brush.mixin.js";
-
-const { enter } = useMagicKeys();
 
 // 暴露给父组件的方法
 defineExpose({
@@ -25,8 +21,18 @@ let changeId: any = ref(0);
 
 let page = computed(() => store.state.page);
 
+let state = computed(() => store.state);
+
 let canvasString = computed(
   () => store.state.pageList[page.value].currpageData.canvasString
+);
+
+watch(
+  () => state.value,
+  () => {
+    canvas.loadFromJSON(canvasString.value);
+  },
+  { deep: true }
 );
 
 const props = defineProps({
@@ -43,40 +49,25 @@ watch(
   }
 );
 
-watch(
-  () => enter.value,
-  (val) => {
-    console.log(val);
-  }
-);
-
 //
 function setImage(e: any) {
   // 上传文件列表的第一个文件
   const file = e.target.files[0];
-  // 图片文件的地址
-  let imgPath = null;
-  // 获取图片文件真实路径
-  // 由于浏览器安全策略，现在需要这么做了
-  // 这段代码是网上复制下来的，想深入理解的可以百度搜搜 “C:\fakepath\”
-  if (window.createObjcectURL != undefined) {
-    imgPath = window.createOjcectURL(file);
-  } else if (window.URL != undefined) {
-    imgPath = window.URL.createObjectURL(file);
-  } else if (window.webkitURL != undefined) {
-    imgPath = window.webkitURL.createObjectURL(file);
-  }
-  console.log(imgPath);
-  // // 设置画布背景，并刷新画布
-  fabric.Image.fromURL(
-    imgPath,
-    function (oImg) {
-      // scale image down, and flip it, before adding it onto canvas
-      oImg.scale(0.2).set("left", 100).set("top", 100);
-      canvas.add(oImg);
-    },
-    { crossOrigin: "anonymous" }
-  );
+  var reader = new FileReader();
+  reader.onload = function (e: any) {
+    const base64URL = e.target.result;
+    fabric.Image.fromURL(
+      base64URL,
+      function (oImg) {
+        // scale image down, and flip it, before adding it onto canvas
+        oImg.scale(0.2).set("left", 100).set("top", 100);
+        canvas.add(oImg);
+      },
+      { crossOrigin: "anonymous" }
+    );
+  };
+  reader.readAsDataURL(file);
+  // 设置画布背景，并刷新画布
   e.target.value = "";
 }
 

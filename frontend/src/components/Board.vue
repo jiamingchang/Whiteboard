@@ -2,14 +2,12 @@
 import Canvas from "./Canvas.vue";
 import { computed, ref, watch } from "vue";
 import store from "@/store";
-import { StorageKey } from "@/store/state";
+
 import { useEyeDropper } from "@vueuse/core";
 import { useAnimationPageWidth } from "@/utils/hooks";
 import { useFullscreen } from "@vueuse/core";
 import { toolbarOptions } from "@/enum/toolbar";
 import { shapeOptions } from "@/enum/shape";
-
-const nickname = ref(sessionStorage.getItem(StorageKey.USER_NAME));
 
 const canvas = ref();
 
