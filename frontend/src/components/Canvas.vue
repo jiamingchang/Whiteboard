@@ -207,7 +207,7 @@ onMounted(() => {
 
 <template>
   <div class="canvasConatiner" ref="container">
-    <canvas ref="canvasRef" id="canvas"></canvas>
+    <canvas ref="canvasRef" id="canvas" width="100%" height="100%"></canvas>
   </div>
 </template>
 
@@ -216,6 +216,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background-image: url("img/grid.svg");
+
   #canvas {
     width: 100%;
     height: 100%;
