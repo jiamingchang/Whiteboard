@@ -26,6 +26,7 @@
       uid: +uid.value,
     });
     ElMessage.success(res.message);
+    sessionStorage.setItem(StorageKey.UID, uid.value);
     router.push(Paths.WHITEBOARD);
   };
 
