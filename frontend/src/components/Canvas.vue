@@ -23,10 +23,9 @@ let page = computed(() => store.state.page);
 
 let state = computed(() => store.state);
 
-let canvasString = computed(() => {
-  console.log("当前page：", page.value);
-  return store.state.pageList[page.value].currpageData.canvasString;
-});
+let canvasString = computed(
+  () => store.state.pageList[page.value].currpageData.canvasString
+);
 
 watch(
   () => page.value,
@@ -178,7 +177,6 @@ let textObj: any;
 function drawText() {
   if (!textObj) {
     // 当前不存在绘制中的文本对象，鼠标第一次按下
-
     // 根据鼠标按下的起点坐标文本对象
     textObj = new fabric.Textbox("", {
       left: downPoint.x,
@@ -233,6 +231,7 @@ function typeChange(opt: any) {
       canvas.skipTargetFind = true; // 禁止选中
       canvas.isDrawingMode = false;
       canvas.freeDrawingBrush.inverted = true;
+      canvas.selection = false;
       break;
     case "paint":
       canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
@@ -272,15 +271,12 @@ function canvasMouseDown(e: any) {
   if (currentType.value === "circle") {
     // 使用 Fabric.js 提供的api创建圆形，此时圆形的半径是0
     curElement = new Circle({
-      top: downPoint.y,
       left: downPoint.x,
+      top: downPoint.y,
       radius: 0,
-      fill: "transparent",
-      stroke: "rgba(0, 0, 0, 0.5)",
     });
     // 初始化
     curElement.init(canvas);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     drawText();
   } else if (currentType.value === "line") {
@@ -311,7 +307,6 @@ function canvasMouseMove(e: any) {
     let left =
       currentPoint.x > downPoint.x ? downPoint.x : downPoint.x - radius * 2;
     curElement.move(canvas, top, left, radius);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     // changeId.value = changeId.value + 1;
   } else if (currentType.value === "line" && curElement) {

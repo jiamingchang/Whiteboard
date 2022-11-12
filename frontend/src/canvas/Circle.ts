@@ -15,7 +15,7 @@ export class Circle {
     this.stroke = "rgba(0, 0, 0, 0.4)";
   }
 
-  public init(canvas: any) {
+  init(canvas: any) {
     currentCircle = new fabric.Circle({
       top: this.top,
       left: this.left,
@@ -26,7 +26,7 @@ export class Circle {
     canvas.add(currentCircle);
   }
 
-  public move(canvas: any, top: number, left: number, radius: number) {
+  move(canvas: any, top: number, left: number, radius: number) {
     // 分别设置圆形的半径、top和left
 
     this.left = left;
@@ -40,7 +40,7 @@ export class Circle {
     canvas.requestRenderAll();
   }
 
-  public up(canvas: any, downPoint: any, upPoint: any) {
+  up(canvas: any, downPoint: any, upPoint: any) {
     // 如果鼠标点击和松开是在同一个坐标，那就不会创建圆形（其实是把刚创建半径为0的圆形删掉）
     if (JSON.stringify(downPoint) === JSON.stringify(upPoint)) {
       canvas.remove(currentCircle);
