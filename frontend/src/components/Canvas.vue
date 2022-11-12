@@ -8,6 +8,8 @@ import { Triangle } from "@/canvas/Triangle";
 import store from "@/store";
 import { ElMessage } from "element-plus";
 import "@/libs/eraser_brush.mixin.js";
+import { uploadBase64 } from "@/service/request/upload";
+import { UPLOAD_URL } from "@/service/request/config";
 
 // 暴露给父组件的方法
 defineExpose({
@@ -77,16 +79,25 @@ function setImage(e: any) {
   const file = e.target.files[0];
   var reader = new FileReader();
   reader.onload = function (e: any) {
-    const base64URL = e.target.result;
-    fabric.Image.fromURL(
-      base64URL,
-      function (oImg) {
-        // scale image down, and flip it, before adding it onto canvas
-        oImg.scale(0.2).set("left", 100).set("top", 100);
-        canvas.add(oImg);
-      },
-      { crossOrigin: "anonymous" }
-    );
+    const base64 = e.target.result;
+    let sourceId = new Date().getTime();
+    uploadBase64({ base64, sourceId })
+      .then((res) => {
+        const url = res.data.data;
+        fabric.Image.fromURL(
+          UPLOAD_URL + url,
+          function (oImg) {
+            // scale image down, and flip it, before adding it onto canvas
+            oImg.scale(0.2).set("left", 100).set("top", 100);
+            canvas.add(oImg);
+            changeId.value = changeId.value + 1;
+          },
+          { crossorigin: "anonymous" } as any
+        );
+      })
+      .catch((err) => {
+        ElMessage.error("服务器异常！！");
+      });
   };
   reader.readAsDataURL(file);
   // 设置画布背景，并刷新画布
