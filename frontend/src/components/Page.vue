@@ -2,6 +2,7 @@
 import { useAnimationPageWidth } from "@/utils/hooks";
 import store from "@/store";
 import { ref, computed } from "vue";
+import { ElMessage } from "element-plus";
 const close = useAnimationPageWidth();
 let pageList = computed(() => store.state.pageList);
 
@@ -21,6 +22,13 @@ const selectPageHandle = (pageId: String) => {
 
 const addPage = () => {
   store.commit("addPage");
+};
+const deletePage = (idx: number) => {
+  if (store.state.pageList.length <= 1) {
+    ElMessage.warning("不能继续删除");
+    return;
+  }
+  store.commit("deletePage", idx);
 };
 </script>
 <template>
@@ -43,7 +51,10 @@ const addPage = () => {
             class="more-action"
             v-if="selectPage === index || hoverIndex === index"
           >
-            <span class="iconfont icon-gengduo"></span>
+            <span
+              class="iconfont icon-shanchu"
+              @click="deletePage(index)"
+            ></span>
           </div>
 
           <span class="page-item-text"
@@ -107,12 +118,12 @@ const addPage = () => {
           width: 22px;
           top: 6px;
           right: 8px;
-          background-color: #b2b2b2;
           border-radius: 2px;
-          .icon-gengduo {
-            color: #fff;
+          .icon-shanchu {
+            color: #999;
             position: absolute;
             margin-left: 3px;
+            cursor: pointer;
           }
         }
       }

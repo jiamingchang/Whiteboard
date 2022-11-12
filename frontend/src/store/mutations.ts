@@ -10,8 +10,6 @@ export default {
     const page = state.pageList.findIndex((item) => item.pageId === pageId);
     if (page !== -1) {
       state.page = page;
-    } else {
-      state.page = -1;
     }
   },
   addPage(state: RootStateType) {
@@ -22,7 +20,13 @@ export default {
         canvasString: "",
       },
     });
-    state.page = state.pageList.length - 1;
+  },
+  deletePage(state: RootStateType, idx: number) {
+    if (state.page >= state.pageList.length - 1) {
+      state.page = state.pageList.length - 2;
+    }
+    console.log("当前page:", state.page);
+    state.pageList.splice(idx, 1);
   },
   changeCurrentType(state: RootStateType, type: string) {
     state.currentType = type;
@@ -30,5 +34,9 @@ export default {
   changeCanvas(state: RootStateType, canvasString: string) {
     const page = state.page;
     state.pageList[page].currpageData.canvasString = canvasString;
+  },
+  changePageList(state: RootStateType, newPageList: any) {
+    console.log("改变当前页面，wsxxxx");
+    state.pageList = [...newPageList];
   },
 };

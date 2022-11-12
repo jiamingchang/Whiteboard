@@ -20,7 +20,6 @@ export interface allPageType {
 }
 
 export interface RootStateType {
-  ctx: any;
   currentType: string;
   pageWidth: number;
   page: number;
@@ -32,7 +31,6 @@ export interface RootStateType {
   token?: string;
   // 内置的Partial suser类型的userInfo属性
   userInfo?: Partial<User>;
-  isLogin: boolean;
 }
 
 // 接口定义对象类型
@@ -43,7 +41,6 @@ export interface GlobalState {
 }
 
 export default {
-  ctx: null,
   currentType: "selection",
   pageWidth: 0,
   page: 0,

@@ -47,4 +47,10 @@ export const toolbarOptions = [
     iconClass: "iconfont icon-xiangpica",
     type: "eraser",
   },
+  {
+    key: 9,
+    tips: "拖动",
+    iconClass: "iconfont icon-capture-screen",
+    type: "grab",
+  },
 ];
