@@ -4,6 +4,7 @@ import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
 import { Rectangle } from "@/canvas/Rect";
 import { Line } from "@/canvas/Line";
+import { Triangle } from "@/canvas/Triangle";
 import store from "@/store";
 import { ElMessage } from "element-plus";
 import "@/libs/eraser_brush.mixin.js";
@@ -226,6 +227,7 @@ function typeChange(opt: any) {
       break;
     case "rectangle": // 创建矩形模式
     case "circle":
+    case "triangle":
       canvas.selectionColor = "transparent"; // 选框填充色：透明
       canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
       canvas.skipTargetFind = true; // 禁止选中
@@ -288,6 +290,9 @@ function canvasMouseDown(e: any) {
   } else if (currentType.value === "rectangle") {
     curElement = new Rectangle();
     curElement.init(canvas, downPoint.x, downPoint.y);
+  } else if (currentType.value === "triangle") {
+    curElement = new Triangle();
+    curElement.init(canvas, downPoint.x, downPoint.y);
   }
 }
 
@@ -316,7 +321,10 @@ function canvasMouseMove(e: any) {
     opt[4] += currentPoint.x - downPoint.x;
     opt[5] += currentPoint.y - downPoint.y;
     canvas.requestRenderAll();
-  } else if (currentType.value === "rectangle" && curElement) {
+  } else if (
+    (currentType.value === "rectangle" || currentType.value === "triangle") &&
+    curElement
+  ) {
     curElement.move(
       canvas,
       currentPoint.x - downPoint.x,
@@ -336,7 +344,10 @@ function canvasMouseUp(e: any) {
     isDragging = false;
     canvas.setViewportTransform(canvas.viewportTransform);
     canvas.selection = true;
-  } else if (currentType.value === "rectangle") {
+  } else if (
+    currentType.value === "rectangle" ||
+    currentType.value === "triangle"
+  ) {
     curElement.end();
   }
   curElement = null;
