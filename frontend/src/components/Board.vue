@@ -78,21 +78,23 @@ const zoomOut = () => {
     scale.value = 0.1;
   } else scale.value -= 0.1;
 };
-
+let timer: any;
 const mouseMoveHandle = (type: string) => {
-  if (["shape", "rectangle", "circle"].includes(type)) {
+  if (["shape", "rectangle", "triangle", "circle"].includes(type)) {
+    if (timer) {
+      clearTimeout(timer);
+    }
     isHover.value = true;
   }
 };
 
-let timer: any;
 const mouseLeaveHanle = () => {
   if (timer) {
     clearTimeout(timer);
   }
-  setTimeout(() => {
+  timer = setTimeout(() => {
     isHover.value = false;
-  }, 500);
+  }, 1000);
 };
 
 const changeShape = (type: string) => {
@@ -157,6 +159,7 @@ const handleUpload = (e: any) => {
           <div
             :class="[item.iconClass, item.type === currentType ? 'active' : '']"
             @mousemove="mouseMoveHandle(item.type)"
+            @mouseleave="mouseLeaveHanle"
           >
             <input
               type="file"

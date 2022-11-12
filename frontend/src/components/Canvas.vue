@@ -4,6 +4,7 @@ import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
 import { Rectangle } from "@/canvas/Rect";
 import { Line } from "@/canvas/Line";
+import { Triangle } from "@/canvas/Triangle";
 import store from "@/store";
 import { ElMessage } from "element-plus";
 import "@/libs/eraser_brush.mixin.js";
@@ -23,10 +24,9 @@ let page = computed(() => store.state.page);
 
 let state = computed(() => store.state);
 
-let canvasString = computed(() => {
-  console.log("当前page：", page.value);
-  return store.state.pageList[page.value].currpageData.canvasString;
-});
+let canvasString = computed(
+  () => store.state.pageList[page.value].currpageData.canvasString
+);
 
 watch(
   () => page.value,
@@ -178,7 +178,6 @@ let textObj: any;
 function drawText() {
   if (!textObj) {
     // 当前不存在绘制中的文本对象，鼠标第一次按下
-
     // 根据鼠标按下的起点坐标文本对象
     textObj = new fabric.Textbox("", {
       left: downPoint.x,
@@ -228,11 +227,13 @@ function typeChange(opt: any) {
       break;
     case "rectangle": // 创建矩形模式
     case "circle":
+    case "triangle":
       canvas.selectionColor = "transparent"; // 选框填充色：透明
       canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
       canvas.skipTargetFind = true; // 禁止选中
       canvas.isDrawingMode = false;
       canvas.freeDrawingBrush.inverted = true;
+      canvas.selection = false;
       break;
     case "paint":
       canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
@@ -272,15 +273,12 @@ function canvasMouseDown(e: any) {
   if (currentType.value === "circle") {
     // 使用 Fabric.js 提供的api创建圆形，此时圆形的半径是0
     curElement = new Circle({
-      top: downPoint.y,
       left: downPoint.x,
+      top: downPoint.y,
       radius: 0,
-      fill: "transparent",
-      stroke: "rgba(0, 0, 0, 0.5)",
     });
     // 初始化
     curElement.init(canvas);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     drawText();
   } else if (currentType.value === "line") {
@@ -291,6 +289,9 @@ function canvasMouseDown(e: any) {
     canvas.selection = false;
   } else if (currentType.value === "rectangle") {
     curElement = new Rectangle();
+    curElement.init(canvas, downPoint.x, downPoint.y);
+  } else if (currentType.value === "triangle") {
+    curElement = new Triangle();
     curElement.init(canvas, downPoint.x, downPoint.y);
   }
 }
@@ -311,7 +312,6 @@ function canvasMouseMove(e: any) {
     let left =
       currentPoint.x > downPoint.x ? downPoint.x : downPoint.x - radius * 2;
     curElement.move(canvas, top, left, radius);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     // changeId.value = changeId.value + 1;
   } else if (currentType.value === "line" && curElement) {
@@ -321,7 +321,10 @@ function canvasMouseMove(e: any) {
     opt[4] += currentPoint.x - downPoint.x;
     opt[5] += currentPoint.y - downPoint.y;
     canvas.requestRenderAll();
-  } else if (currentType.value === "rectangle" && curElement) {
+  } else if (
+    (currentType.value === "rectangle" || currentType.value === "triangle") &&
+    curElement
+  ) {
     curElement.move(
       canvas,
       currentPoint.x - downPoint.x,
@@ -341,7 +344,10 @@ function canvasMouseUp(e: any) {
     isDragging = false;
     canvas.setViewportTransform(canvas.viewportTransform);
     canvas.selection = true;
-  } else if (currentType.value === "rectangle") {
+  } else if (
+    currentType.value === "rectangle" ||
+    currentType.value === "triangle"
+  ) {
     curElement.end();
   }
   curElement = null;
