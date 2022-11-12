@@ -111,6 +111,10 @@ const changeShape = (type: string) => {
 const handleUpload = (e: any) => {
   canvas.value.setImage(e);
 };
+
+const clearSrceen = () => {
+  canvas.value.clearSrceen();
+};
 </script>
 
 <template>
@@ -130,6 +134,7 @@ const handleUpload = (e: any) => {
       <div class="top-action-item">
         <div class="iconfont icon-huanyuan" @click="withdraw"></div>
         <div class="iconfont icon-huanyuan-01" @click="reduction"></div>
+        <div class="iconfont icon-qingping" @click="clearSrceen"></div>
       </div>
     </div>
     <div class="right-show">
@@ -138,6 +143,7 @@ const handleUpload = (e: any) => {
         :style="{ background: sRGBHex ? sRGBHex : '#fff' }"
         class="right-show-item"
       ></div>
+      <span class="text">{{ sRGBHex ? sRGBHex : "rgb(0,0,0)" }}</span>
     </div>
     <div
       class="toolbar"
@@ -319,6 +325,9 @@ const handleUpload = (e: any) => {
       background-color: #fff;
       border: 1px solid #999;
     }
+    .text {
+      margin-left: 12px;
+    }
   }
   .shape-action {
     position: fixed;
@@ -357,12 +366,14 @@ const handleUpload = (e: any) => {
       height: 20px;
       box-shadow: 0 2px 10px rgb(0 0 0 / 3%);
       cursor: pointer;
-      .icon-huanyuan {
+      .iconfont {
         font-size: 20px;
       }
       .icon-huanyuan-01 {
-        font-size: 20px;
         font-weight: 600;
+        margin-left: 20px;
+      }
+      .icon-qingping {
         margin-left: 20px;
       }
       .iconfont:hover {

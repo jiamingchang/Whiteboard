@@ -26,14 +26,15 @@ const handleCreate = async () => {
   router.push(Paths.WHITEBOARD);
 };
 
-const handleEnter = async () => {
-  console.log(typeof uid.value);
-  const res = await JoinRoom({
-    uid: +uid.value,
-  });
-  ElMessage.success(res.message);
-  router.push(Paths.WHITEBOARD);
-};
+  const handleEnter = async () => {
+    console.log(typeof uid.value);
+    const res = await JoinRoom({
+      uid: +uid.value,
+    });
+    ElMessage.success(res.message);
+    sessionStorage.setItem(StorageKey.UID, uid.value);
+    router.push(Paths.WHITEBOARD);
+  };
 
 const handleExit = async () => {
   const res = await exitRoom({});
