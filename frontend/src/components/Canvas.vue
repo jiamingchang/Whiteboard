@@ -13,6 +13,7 @@ import "@/libs/eraser_brush.mixin.js";
 defineExpose({
   tapHistoryBtn,
   setImage,
+  clearSrceen,
 });
 
 // 当前页面画布
@@ -64,6 +65,11 @@ watch(
     changeId.value = changeId.value + 1;
   }
 );
+
+function clearSrceen() {
+  canvas.clear();
+  changeId.value = changeId.value + 1;
+}
 
 //
 function setImage(e: any) {
