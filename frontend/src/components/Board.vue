@@ -30,7 +30,6 @@ let scale = ref(1);
 
 // 是否悬浮形状
 let isHover = ref(false);
-let isHoverShape = ref(false);
 
 let currpage = computed(() => store.state.page + 1);
 let totalCount = computed(() => store.state.pageList.length);
