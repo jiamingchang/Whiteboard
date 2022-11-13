@@ -2,7 +2,7 @@
 
 白板在线体验网址：http://182.61.20.203/
 
-演示视频：
+演示视频：https://www.bilibili.com/video/BV1bv4y1S7Yy/
 
 源码及架构文档：/docs/白板.md
 
