@@ -12,7 +12,7 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
-
+    
     "baseUrl": ".",  //配置ts文件采用@方式导入
     "paths": {
       "@/*": ["src/*"]
