@@ -20,7 +20,8 @@ func AuthRequired() gin.HandlerFunc {
 			mesg = "没有携带token"
 			context.JSON(code, gin.H{
 				"code": code,
-				"mesg": mesg,
+				"message": mesg,
+				"data": "",
 			})
 			// context.Abort() 若token验证失败，调用此函数确保该请求的其他函数不会被调用
 			context.Abort()
@@ -32,7 +33,8 @@ func AuthRequired() gin.HandlerFunc {
 				mesg = "token验证失败"
 				context.JSON(code, gin.H{
 					"code": code,
-					"mesg": mesg,
+					"message": mesg,
+					"data": "",
 				})
 				context.Abort()
 				return
@@ -41,7 +43,8 @@ func AuthRequired() gin.HandlerFunc {
 				mesg = "token已过期"
 				context.JSON(code, gin.H{
 					"code": code,
-					"mesg": mesg,
+					"message": mesg,
+					"data": "",
 				})
 				context.Abort()
 				return
@@ -50,7 +53,9 @@ func AuthRequired() gin.HandlerFunc {
 			user, err := models.GetUser(claims.UserID)
 			if err != nil {
 				context.JSON(http.StatusOK, gin.H{
+					"code": 500,
 					"message": "用户不存在",
+					"data": "",
 				})
 				context.Abort()
 				return

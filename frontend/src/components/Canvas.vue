@@ -4,14 +4,18 @@ import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
 import { Rectangle } from "@/canvas/Rect";
 import { Line } from "@/canvas/Line";
+import { Triangle } from "@/canvas/Triangle";
 import store from "@/store";
 import { ElMessage } from "element-plus";
 import "@/libs/eraser_brush.mixin.js";
+import { uploadBase64 } from "@/service/request/upload";
+import { UPLOAD_URL } from "@/service/request/config";
 
 // 暴露给父组件的方法
 defineExpose({
   tapHistoryBtn,
   setImage,
+  clearSrceen,
 });
 
 // 当前页面画布
@@ -23,10 +27,11 @@ let page = computed(() => store.state.page);
 
 let state = computed(() => store.state);
 
-let canvasString = computed(() => {
-  console.log("当前page：", page.value);
-  return store.state.pageList[page.value].currpageData.canvasString;
-});
+let canvasString = computed(
+  () => store.state.pageList[page.value].currpageData.canvasString
+);
+
+let isRoomer = computed(() => store.state.isRoomer);
 
 watch(
   () => page.value,
@@ -57,8 +62,8 @@ const props = defineProps({
   },
   isReadOnly: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 });
 
 watch(
@@ -74,10 +79,15 @@ watch(
   () => props.isReadOnly,
   (val) => {
     if (val) {
-      store.commit("changeCurrentType", '');
+      store.commit("changeCurrentType", "");
     }
   }
 );
+
+function clearSrceen() {
+  canvas.clear();
+  changeId.value = changeId.value + 1;
+}
 
 //
 function setImage(e: any) {
@@ -85,16 +95,25 @@ function setImage(e: any) {
   const file = e.target.files[0];
   var reader = new FileReader();
   reader.onload = function (e: any) {
-    const base64URL = e.target.result;
-    fabric.Image.fromURL(
-      base64URL,
-      function (oImg) {
-        // scale image down, and flip it, before adding it onto canvas
-        oImg.scale(0.2).set("left", 100).set("top", 100);
-        canvas.add(oImg);
-      },
-      { crossOrigin: "anonymous" }
-    );
+    const base64 = e.target.result;
+    let sourceId = new Date().getTime();
+    uploadBase64({ base64, sourceId })
+      .then((res) => {
+        const url = res.data.data;
+        fabric.Image.fromURL(
+          UPLOAD_URL + url,
+          function (oImg) {
+            // scale image down, and flip it, before adding it onto canvas
+            oImg.scale(0.2).set("left", 100).set("top", 100);
+            canvas.add(oImg);
+            changeId.value = changeId.value + 1;
+          },
+          { crossorigin: "anonymous" } as any
+        );
+      })
+      .catch((err) => {
+        ElMessage.error("服务器异常！！");
+      });
   };
   reader.readAsDataURL(file);
   // 设置画布背景，并刷新画布
@@ -192,7 +211,6 @@ let textObj: any;
 function drawText() {
   if (!textObj) {
     // 当前不存在绘制中的文本对象，鼠标第一次按下
-
     // 根据鼠标按下的起点坐标文本对象
     textObj = new fabric.Textbox("", {
       left: downPoint.x,
@@ -242,11 +260,13 @@ function typeChange(opt: any) {
       break;
     case "rectangle": // 创建矩形模式
     case "circle":
+    case "triangle":
       canvas.selectionColor = "transparent"; // 选框填充色：透明
       canvas.selectionBorderColor = "transparent"; // 选框边框颜色：透明度很低的黑色（看上去是灰色）
       canvas.skipTargetFind = true; // 禁止选中
       canvas.isDrawingMode = false;
       canvas.freeDrawingBrush.inverted = true;
+      canvas.selection = false;
       break;
     case "paint":
       canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
@@ -286,15 +306,12 @@ function canvasMouseDown(e: any) {
   if (currentType.value === "circle") {
     // 使用 Fabric.js 提供的api创建圆形，此时圆形的半径是0
     curElement = new Circle({
-      top: downPoint.y,
       left: downPoint.x,
+      top: downPoint.y,
       radius: 0,
-      fill: "transparent",
-      stroke: "rgba(0, 0, 0, 0.5)",
     });
     // 初始化
     curElement.init(canvas);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     drawText();
   } else if (currentType.value === "line") {
@@ -305,6 +322,9 @@ function canvasMouseDown(e: any) {
     canvas.selection = false;
   } else if (currentType.value === "rectangle") {
     curElement = new Rectangle();
+    curElement.init(canvas, downPoint.x, downPoint.y);
+  } else if (currentType.value === "triangle") {
+    curElement = new Triangle();
     curElement.init(canvas, downPoint.x, downPoint.y);
   }
 }
@@ -325,7 +345,6 @@ function canvasMouseMove(e: any) {
     let left =
       currentPoint.x > downPoint.x ? downPoint.x : downPoint.x - radius * 2;
     curElement.move(canvas, top, left, radius);
-    changeId.value = changeId.value + 1;
   } else if (currentType.value === "text") {
     // changeId.value = changeId.value + 1;
   } else if (currentType.value === "line" && curElement) {
@@ -335,7 +354,10 @@ function canvasMouseMove(e: any) {
     opt[4] += currentPoint.x - downPoint.x;
     opt[5] += currentPoint.y - downPoint.y;
     canvas.requestRenderAll();
-  } else if (currentType.value === "rectangle" && curElement) {
+  } else if (
+    (currentType.value === "rectangle" || currentType.value === "triangle") &&
+    curElement
+  ) {
     curElement.move(
       canvas,
       currentPoint.x - downPoint.x,
@@ -355,7 +377,10 @@ function canvasMouseUp(e: any) {
     isDragging = false;
     canvas.setViewportTransform(canvas.viewportTransform);
     canvas.selection = true;
-  } else if (currentType.value === "rectangle") {
+  } else if (
+    currentType.value === "rectangle" ||
+    currentType.value === "triangle"
+  ) {
     curElement.end();
   }
   curElement = null;
@@ -370,7 +395,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="canvasConatiner" ref="container">
+  <div
+    :class="['canvasConatiner', !isReadOnly || isRoomer ? '' : 'read_only']"
+    ref="container"
+  >
     <canvas ref="canvasRef" id="canvas" width="100%" height="100%"></canvas>
   </div>
 </template>
@@ -380,5 +408,8 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background-image: url("img/grid.svg");
+}
+.read_only {
+  pointer-events: none;
 }
 </style>

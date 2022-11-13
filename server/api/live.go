@@ -29,11 +29,17 @@ type cont struct {
 }
 
 // mess 传输的数据
+// ---Code---
+// 100:成功接入ws
+// 101:有用户加入房间
+// 102:房主已退出
+// 103:房主更改房间为只读
+// 104:房主更改房间为协作
+// 105:用户请求更改权限:read_only(1:只读，2:协作)
 type mess struct {
 	Message string `json:"message"`
-
 	Code 	int `json:"code"`
-	System string `json:"system"`
+	System  string `json:"system"`
 }
 
 var conts []cont
@@ -75,7 +81,7 @@ func KeepLive(c *gin.Context) {
 		_ = conn.Close()
 		return
 	}
-	conn.WriteJSON(&mess{System: "成功接入ws"})
+	_ = conn.WriteJSON(&mess{Code: 100, System: "成功接入ws"})
 
 	// 保存上下文
 	addClient(user, conn)
@@ -117,10 +123,15 @@ func writedata(id uint, me mess){
 
 // send 消息处理
 func send(con cont, me mess){
-	users := con.user.GetRoomUser()
-	for _,u := range users{
-		if u.ID != con.userid{
-			writedata(u.ID, me)
+	if room, ok := con.user.GetUserRoom();ok{
+		// 只读(为房主)，或协作
+		if (room.ReadOnly == 1&&con.userid == con.user.GetRoomer().ID)||room.ReadOnly==2 {
+			users := con.user.GetRoomUser()
+			for _, u := range users {
+				if u.ID != con.userid {
+					writedata(u.ID, me)
+				}
+			}
 		}
 	}
 }
@@ -132,6 +143,11 @@ func SysSend(users []models.User, me mess){
 			writedata(u.ID, me)
 		}
 	}
+}
+
+// SysSendRoomer 系统通知(发送给房主)
+func SysSendRoomer(user models.User, me mess){
+	writedata(user.ID, me)
 }
 
 func addClient(user models.User, conn *websocket.Conn) {
@@ -170,25 +186,31 @@ func deleteClient(id uint) {
 
 
 // 服务器心跳机制
-var pingTicker  = time.NewTicker(time.Second * 2)
+var pingTicker = time.NewTicker(time.Second * 5)
 func live() {
 	for {
 		select {
 		case <-pingTicker.C:
-			// 服务端心跳:每2秒ping一次客户端，查看其是否在线
+			// 服务端心跳:每5秒ping一次客户端，查看其是否在线
 			for _, con := range conts {
 				conn := con.conn
-				_ = conn.SetWriteDeadline(time.Now().Add(time.Second * 2))
+				_ = conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
 				err := conn.WriteMessage(websocket.PingMessage, []byte{})
 				if err != nil {
 					log.Println("send ping err:", err)
-					users := con.user.ExitRoom()
-					// 发布通知
-					go func(users []models.User){
-						if len(users)>1{
-							SysSend(users, mess{System: "房主已退出"})
+					go func(con cont) {
+						users := con.user.GetRoomUser()
+						if con.user.GetRoomer().ID==con.user.ID {
+							// 发布通知
+							go func(users []models.User){
+								if len(users)>1{
+									SysSend(users, mess{Code: 102, System: "房主已退出"})
+								}
+							}(users)
 						}
-					}(users)
+						con.user.ExitRoom()
+					}(con)
+
 					deleteClient(con.userid)
 				}
 			}

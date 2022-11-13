@@ -5,8 +5,8 @@ import { User } from "@/utils/types";
 export const enum StorageKey {
   TOKEN = "TOKEN",
   USER_NAME = "USER_NAME",
-  UID = 'UID',
-  IS_ROOMER = "IS_ROOMER"
+  UID = "UID",
+  IS_ROOMER = "IS_ROOMER",
 }
 
 export interface AllElementType {}
@@ -25,10 +25,10 @@ export interface RootStateType {
   pageWidth: number;
   page: number;
   pageList: Array<allPageType>;
-  isRoomer: boolean; 
+  isRoomer: boolean;
   isReadOnly: boolean;
-  isSendRequest: boolean;
-  isAcceptRequest: boolean;
+  acceptRequestId: number;
+  acceptReadOnly: number;
 }
 
 // state类型的数据
@@ -63,8 +63,8 @@ export default {
       },
     },
   ],
-  isRoomer: true,
-  // isSendRequest: false,
-  isAcceptRequest: false,
+  isRoomer: false,
+  acceptRequestId: 0,
   isReadOnly: true,
+  acceptReadOnly: 0,
 };

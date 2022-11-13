@@ -7,7 +7,7 @@ type User struct {
 	gorm.Model
 	TrueName string `json:"true_name" validate:"required"`
 	Name string		`json:"name" validate:"required"`
-	Password string `json:"password" validate:"required,max=20,min=6"`
+	Password string `json:"password" validate:"required"`
 	RoomID uint		`json:"room_id"`
 }
 

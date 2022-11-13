@@ -71,3 +71,16 @@ export const AskRoom = (data: any) =>
     method: "POST",
     data,
   });
+
+export const getRoom = (uid: string) =>
+  request({
+    url: "/wb/getRoom?uid=" + uid,
+    method: "GET",
+  });
+
+export const updateRoom = (data = {}) =>
+  request({
+    url: "/wb/updateRoom",
+    method: "POST",
+    data,
+  });
