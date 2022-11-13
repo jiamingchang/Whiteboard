@@ -58,3 +58,16 @@ export const GetUserRoom = (data: any) =>
     url: "/wb/getUserRoom",
     method: "GET",
   });
+
+export const GetRoomer = (data: any) =>
+  request({
+    url: "/wb/getRoomer",
+    method: "GET",
+  });
+
+export const AskRoom = (data: any) =>
+  request({
+    url: "/wb/askRoom",
+    method: "POST",
+    data,
+  });

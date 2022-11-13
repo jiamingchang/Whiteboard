@@ -39,4 +39,19 @@ export default {
     console.log("改变当前页面，wsxxxx");
     state.pageList = [...newPageList];
   },
+  // 存是否是房主
+  saveIsRoomer(state: RootStateType, isRoomer: boolean) {
+    console.log('mutation 存是否是房主', isRoomer);
+    state.isRoomer = isRoomer;
+  },
+  // 房主只读状态（广播）
+  changeIsReadOnly(state: RootStateType, isReadOnly: boolean) {
+    console.log('mutation 房主只读状态', isReadOnly);
+    state.isReadOnly = isReadOnly;
+  },
+  // 房主：收到切换模式请求
+  changeIsAcceptRequest(state: RootStateType, isAcceptRequest: boolean) {
+    console.log('mutation 房主：收到切换模式请求', isAcceptRequest);
+    state.isAcceptRequest = isAcceptRequest;
+  },
 };

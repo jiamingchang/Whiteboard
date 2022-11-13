@@ -7,6 +7,8 @@ import { StorageKey } from "@/store/state";
 import { ElMessage } from "element-plus";
 let pageWidth = computed(() => store.state.pageWidth);
 let pageList = computed(() => store.state.pageList);
+// let isSendRequest = computed(() => store.state.isSendRequest);
+let isAcceptRequest = computed(() => store.state.isAcceptRequest);
 let token = sessionStorage.getItem(StorageKey.TOKEN) + "";
 const nickname = sessionStorage.getItem(StorageKey.USER_NAME) + "";
 
@@ -66,10 +68,26 @@ function connectWebsocket() {
         const newPageList = JSON.parse(data.message);
         console.log(newPageList);
         sendername = data.system;
-        store.commit("changePageList", newPageList);
+        store.commit("isRoomer", newPageList);
       }
       if (data.code === 102) {
         ElMessage.warning(data.system);
+      }
+      // todo
+      // 房主更改为只读
+      if (data.code === 103) {
+        store.commit("changeIsReadOnly", true);
+        ElMessage('房主改成只读模式了');
+      }
+      // 房主更改为协作
+      if (data.code === 104) {
+        store.commit("changeIsReadOnly", false);
+        ElMessage('房主改成协作模式了');
+      }
+      // 用户请求更改权限：read_only(1：只读, 2：协作)
+      if (data.code === 105) {
+        store.commit("changeIsReadOnly", false);
+        ElMessage('当前为协作模式');
       }
     };
     // 发生错误时
