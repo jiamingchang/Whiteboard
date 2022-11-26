@@ -60,11 +60,10 @@ onBeforeMount(() => {
   getRoom(uid.value as string)
     .then((res) => {
       const userid = sessionStorage.getItem("userid");
-      if (res.data.who_add == userid) {
+      if ((res.data as any).who_add == userid) {
         store.commit("saveIsRoomer", true);
       }
-      console.log("res.data.read_only:", res.data.read_only);
-      if (res.data.read_only == 1) {
+      if ((res.data as any).read_only == 1) {
         store.commit("changeIsReadOnly", true);
       } else {
         store.commit("changeIsReadOnly", false);
@@ -106,13 +105,14 @@ const reduction = () => {
 
 // 判断是否是房主，房主切换逻辑
 const roomerSwitch = () => {
+  console.log("请求。。。。xxxx");
   userVisible.value = true;
 };
 
 // 用户：请求切换协作模式
 const switchMode = async () => {
   await AskRoom({ read_only: isReadOnly.value ? 2 : 1 });
-  store.commit("changeIsReadOnly", isReadOnly.value ? false : true);
+  // store.commit("changeIsReadOnly", isReadOnly.value ? false : true);
   userVisible.value = false;
 };
 

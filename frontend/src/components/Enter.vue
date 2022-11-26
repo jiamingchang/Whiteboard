@@ -35,7 +35,7 @@ const isExistRoom = ref(false);
 onBeforeMount(() => {
   GetUserRoom({}).then((res) => {
     console.log("获取用户所在房间：", res);
-    if (res.data.uid) {
+    if ((res.data as any).uid) {
       isExistRoom.value = true;
     }
   });
@@ -49,7 +49,6 @@ const handleCreate = async () => {
   });
   ElMessage.success(res.message);
   await sessionStorage.setItem(StorageKey.UID, (res.data as any).uid);
-  await sessionStorage.setItem(StorageKey.IS_ROOMER, true);
   router.push(Paths.WHITEBOARD);
 };
 
@@ -60,14 +59,12 @@ const handleEnter = async () => {
   });
   ElMessage.success(res.message);
   sessionStorage.setItem(StorageKey.UID, uid.value);
-  sessionStorage.setItem(StorageKey.IS_ROOMER, false);
   router.push(Paths.WHITEBOARD);
 };
 
 const handleExit = async () => {
   const res = await exitRoom({});
   ElMessage.success(res.message);
-  sessionStorage.removeItem(StorageKey.IS_ROOMER);
   isExistRoom.value = false;
 };
 

@@ -30,7 +30,7 @@ watch(
       dangerouslyUseHTMLString: true,
       message: `<div style="width: 100%; display: flex; justify-content: space-around">
       <div>${acceptReadOnly.value == 1 ? "只读模式" : "协作模式"}</div>
-      <div style="background-color: #35456a; padding: 0 4px" onclick="submit()">确定</div>
+      <div style="background-color: #35456a;  padding: 0 4px; color: white; border-radios: 5px;" onclick="submit()">确定</div>
     </div>`,
       duration: 0,
     });

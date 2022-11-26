@@ -32,12 +32,16 @@ watch(
 
 const userInfo = reactive({
   true_name: "",
-  name: "123456",
-  password: "111111",
+  name: "",
+  password: "",
 });
 
 // 登入
 const handleLogin = async () => {
+  if (!userInfo.name || !userInfo.password) {
+    ElMessage.error("账号或者密码不能为空");
+    return;
+  }
   const res = await Login({
     name: userInfo.name,
     password: Md5.hashStr(userInfo.password),
