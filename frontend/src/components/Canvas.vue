@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick, computed } from "vue";
+import { ref, onMounted, watch, nextTick, computed, defineProps } from "vue";
 import { fabric } from "fabric";
 import { Circle } from "@/canvas/Circle";
 import { Rectangle } from "@/canvas/Rect";
@@ -31,6 +31,8 @@ let canvasString = computed(
   () => store.state.pageList[page.value].currpageData.canvasString
 );
 
+let isRoomer = computed(() => store.state.isRoomer);
+
 watch(
   () => page.value,
   (val) => {
@@ -58,6 +60,10 @@ const props = defineProps({
     type: Number,
     default: 1,
   },
+  isReadOnly: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 watch(
@@ -65,6 +71,16 @@ watch(
   (val) => {
     canvas.setZoom(val);
     changeId.value = changeId.value + 1;
+  }
+);
+
+// 只读模式下所有人不可画图
+watch(
+  () => props.isReadOnly,
+  (val) => {
+    if (val) {
+      store.commit("changeCurrentType", "");
+    }
   }
 );
 
@@ -379,7 +395,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="canvasConatiner" ref="container">
+  <div
+    :class="['canvasConatiner', !isReadOnly || isRoomer ? '' : 'read_only']"
+    ref="container"
+  >
     <canvas ref="canvasRef" id="canvas" width="100%" height="100%"></canvas>
   </div>
 </template>
@@ -389,5 +408,8 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background-image: url("img/grid.svg");
+}
+.read_only {
+  pointer-events: none;
 }
 </style>

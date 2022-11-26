@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, watch, onBeforeMount } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Paths } from "@/router";
 import {
   CreateRoom,
@@ -8,38 +8,63 @@ import {
   DeleteUser,
   exitRoom,
   GetUserRoom,
+  GetRoomer,
 } from "@/service";
 import { StorageKey } from "@/store/state";
 import { ElMessage } from "element-plus";
+import store from "@/store";
 const router = useRouter();
+const route = useRoute();
 
+console.log(router);
+
+watch(
+  () => route.path,
+  (val) => {
+    console.log(val);
+  }
+);
+
+// 加入房间input的value
 const uid = ref();
+
 const dialogVisible = ref(false);
-const isExistRoom = ref(sessionStorage.getItem(StorageKey.UID) ? true : false);
+
+const isExistRoom = ref(false);
+
+onBeforeMount(() => {
+  GetUserRoom({}).then((res) => {
+    console.log("获取用户所在房间：", res);
+    if ((res.data as any).uid) {
+      isExistRoom.value = true;
+    }
+  });
+});
+
+// 当前是否进入房间
 
 const handleCreate = async () => {
   const res = await CreateRoom({
-    read_only: 2,
+    read_only: 1,
   });
   ElMessage.success(res.message);
-  sessionStorage.setItem(StorageKey.UID, (res.data as any).uid);
+  await sessionStorage.setItem(StorageKey.UID, (res.data as any).uid);
   router.push(Paths.WHITEBOARD);
 };
 
-  const handleEnter = async () => {
-    console.log(typeof uid.value);
-    const res = await JoinRoom({
-      uid: +uid.value,
-    });
-    ElMessage.success(res.message);
-    sessionStorage.setItem(StorageKey.UID, uid.value);
-    router.push(Paths.WHITEBOARD);
-  };
+const handleEnter = async () => {
+  console.log(typeof uid.value);
+  const res = await JoinRoom({
+    uid: +uid.value,
+  });
+  ElMessage.success(res.message);
+  sessionStorage.setItem(StorageKey.UID, uid.value);
+  router.push(Paths.WHITEBOARD);
+};
 
 const handleExit = async () => {
   const res = await exitRoom({});
   ElMessage.success(res.message);
-  sessionStorage.removeItem(StorageKey.UID);
   isExistRoom.value = false;
 };
 

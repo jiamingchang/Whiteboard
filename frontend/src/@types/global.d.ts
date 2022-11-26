@@ -11,4 +11,5 @@ type ServerResJSON<T = undefined> = {
 declare interface Window {
   createObjcectURL: any;
   createOjcectURL: any;
+  submit: any;
 }

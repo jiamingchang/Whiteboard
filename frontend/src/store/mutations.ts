@@ -39,4 +39,18 @@ export default {
     console.log("改变当前页面，wsxxxx");
     state.pageList = [...newPageList];
   },
+  // 判断是否房主
+  saveIsRoomer(state: RootStateType, isRoomer: boolean) {
+    state.isRoomer = isRoomer;
+  },
+  // 只读状态（广播）
+  changeIsReadOnly(state: RootStateType, isReadOnly: boolean) {
+    console.log("改变isReadOnly:", isReadOnly);
+    state.isReadOnly = isReadOnly;
+  },
+  // 房主：收到切换模式请求
+  changeIsAcceptRequest(state: RootStateType, read_only: number) {
+    state.acceptRequestId = state.acceptRequestId + 1;
+    state.acceptReadOnly = read_only;
+  },
 };
